@@ -178,7 +178,7 @@ export default function Dashboard() {
           display: 'flex', justifyContent: sidebarOpen ? 'flex-start' : 'center',
           transition: 'all 0.25s ease',
         }}>
-          <UserButton afterSignOutUrl="/" />
+          <UserButton  />
         </div>
       </aside>
 

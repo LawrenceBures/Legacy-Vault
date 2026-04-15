@@ -216,7 +216,7 @@ export default function EntryDetailPage() {
           </a>
         ))}
         <div style={{ marginTop: 'auto', paddingBottom: '8px', paddingLeft: sidebarOpen ? '20px' : '0', width: '100%', display: 'flex', justifyContent: sidebarOpen ? 'flex-start' : 'center', transition: 'all 0.25s ease' }}>
-          <UserButton afterSignOutUrl="/" />
+          <UserButton  />
         </div>
       </aside>
 
