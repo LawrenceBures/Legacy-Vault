@@ -14,12 +14,13 @@ export async function GET(req: NextRequest) {
 
     if (!clerkId) return NextResponse.json({ error: 'Missing clerk_id' }, { status: 400 })
 
-    await supabase.from('profiles').upsert({
+    const upsertData: any = {
       clerk_id: clerkId,
       email,
-      full_name: fullName,
       last_active: new Date().toISOString(),
-    }, { onConflict: 'clerk_id', ignoreDuplicates: false })
+    }
+    if (fullName) upsertData.full_name = fullName
+    await supabase.from('profiles').upsert(upsertData, { onConflict: 'clerk_id', ignoreDuplicates: false })
 
     const { data: profile } = await supabase
       .from('profiles')
