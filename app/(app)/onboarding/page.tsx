@@ -231,29 +231,44 @@ export default function OnboardingPage() {
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
             {[
-              { id: 'starter_founder', name: 'Starter Vault', price: '$1.99/mo', desc: 'Text messages only · 1 vault · 1 recipient', badge: '✓ Available' },
-              { id: 'basic_founder', name: 'Basic', price: '$4.99/mo', desc: 'Audio (15s pre-launch) · 3 recipients · Milestone Delivery', badge: '✓ Available' },
-              { id: 'legacy_founder', name: 'Legacy', price: '$9.99/mo', desc: 'Audio & video (15s pre-launch) · Unlimited · Full AI assistant', badge: '🔥 Most popular' },
-              { id: 'family_founder', name: 'Family', price: '$19.99/mo', desc: 'Up to 5 vaults · Family Dashboard · 100GB storage', badge: '⚠️ Limited' },
-              { id: 'estate_founder', name: 'Estate', price: '$49.99/mo', desc: 'Attorney-verified · Dedicated manager · Unlimited storage', badge: '🚨 4 spots left' },
+              { id: 'starter_founder', name: 'Starter Vault', price: '$1.99/mo', badge: '✓ Available', features: ['1 vault entry', '1 recipient', 'Text messages only', '1GB storage', 'Annual check-in reminder', 'Trusted contact verification', 'Basic inactivity trigger'] },
+              { id: 'basic_founder', name: 'Basic', price: '$4.99/mo', badge: '✓ Available', features: ['1 vault entry', 'Up to 3 recipients', 'Audio messages (15 sec pre-launch)', '1 AI-assisted Legacy Letter', 'Milestone Delivery (1 event)', 'Trusted contact verification', 'Annual check-in reminder', '7-day delivery warning', '2GB storage'] },
+              { id: 'legacy_founder', name: 'Legacy', price: '$9.99/mo', badge: '🔥 Most popular', features: ['Unlimited vault entries', 'Unlimited recipients', 'Audio & video (15 sec pre-launch)', 'Full AI writing assistant', 'Unlimited Milestone Delivery', 'Custom inactivity window', 'Family unlock code', '3 warning notifications', 'Legal document storage', 'Custom recipient message', '25GB storage', 'Priority support'] },
+              { id: 'family_founder', name: 'Family', price: '$19.99/mo', badge: '⚠️ Limited', features: ['Up to 5 individual vaults', 'Everything in Legacy per vault', 'Family Admin Dashboard', 'Family Executor role', 'Shared document storage', 'Multiple unlock codes', 'Legacy Timeline', 'Annual family check-in', '100GB shared storage'] },
+              { id: 'estate_founder', name: 'Estate', price: '$49.99/mo', badge: '🚨 4 spots left', features: ['Everything in Family', 'Attorney-verified documents', 'Notarized delivery confirmation', 'Estate attorney integration', 'Dedicated account manager', 'Insurance policy management', 'Legal instruction builder', 'White-glove onboarding', 'Unlimited storage'] },
             ].map(tier => (
               <div key={tier.id}
                 onClick={() => setSelectedTier(tier.id)}
+                onMouseEnter={() => setHoveredType(tier.id)}
+                onMouseLeave={() => setHoveredType(null)}
                 style={{
-                  padding: '16px 20px', border: `1px solid ${selectedTier === tier.id ? 'rgba(184,155,94,0.6)' : 'rgba(245,243,239,0.08)'}`,
-                  borderRadius: '8px', background: selectedTier === tier.id ? 'rgba(184,155,94,0.08)' : 'rgba(245,243,239,0.03)',
-                  cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '16px', transition: 'all 0.2s ease',
+                  padding: '16px 20px', border: `1px solid ${selectedTier === tier.id ? 'rgba(184,155,94,0.6)' : hoveredType === tier.id ? 'rgba(184,155,94,0.3)' : 'rgba(245,243,239,0.08)'}`,
+                  borderRadius: '8px', background: selectedTier === tier.id ? 'rgba(184,155,94,0.08)' : hoveredType === tier.id ? 'rgba(184,155,94,0.04)' : 'rgba(245,243,239,0.03)',
+                  cursor: 'pointer', transition: 'all 0.2s ease',
                 }}
               >
-                <div style={{ flex: 1 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '3px' }}>
-                    <div style={{ fontSize: '14px', fontWeight: 600, color: '#F5F3EF' }}>{tier.name}</div>
-                    <div style={{ fontSize: '9px', padding: '2px 8px', background: 'rgba(184,155,94,0.1)', color: '#B89B5E', border: '1px solid rgba(184,155,94,0.2)', borderRadius: '20px' }}>{tier.badge}</div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '3px' }}>
+                      <div style={{ fontSize: '14px', fontWeight: 600, color: '#F5F3EF' }}>{tier.name}</div>
+                      <div style={{ fontSize: '9px', padding: '2px 8px', background: 'rgba(184,155,94,0.1)', color: '#B89B5E', border: '1px solid rgba(184,155,94,0.2)', borderRadius: '20px' }}>{tier.badge}</div>
+                    </div>
                   </div>
-                  <div style={{ fontSize: '12px', color: 'rgba(245,243,239,0.4)', marginBottom: '2px' }}>{tier.desc}</div>
+                  <div style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '20px', color: '#B89B5E', flexShrink: 0 }}>{tier.price}</div>
+                  <div style={{ width: '18px', height: '18px', borderRadius: '50%', flexShrink: 0, border: `2px solid ${selectedTier === tier.id ? '#B89B5E' : 'rgba(245,243,239,0.2)'}`, background: selectedTier === tier.id ? '#B89B5E' : 'transparent', transition: 'all 0.18s ease' }} />
                 </div>
-                <div style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '20px', color: '#B89B5E', flexShrink: 0 }}>{tier.price}</div>
-                <div style={{ width: '18px', height: '18px', borderRadius: '50%', flexShrink: 0, border: `2px solid ${selectedTier === tier.id ? '#B89B5E' : 'rgba(245,243,239,0.2)'}`, background: selectedTier === tier.id ? '#B89B5E' : 'transparent', transition: 'all 0.18s ease' }} />
+                {(hoveredType === tier.id || selectedTier === tier.id) && (
+                  <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px solid rgba(245,243,239,0.08)' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4px 16px' }}>
+                      {tier.features.map((f, i) => (
+                        <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '6px' }}>
+                          <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: 'rgba(184,155,94,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '7px', color: '#B89B5E', flexShrink: 0, marginTop: '2px' }}>✓</div>
+                          <div style={{ fontSize: '11px', color: 'rgba(245,243,239,0.55)', lineHeight: 1.4 }}>{f}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             ))}
           </div>
