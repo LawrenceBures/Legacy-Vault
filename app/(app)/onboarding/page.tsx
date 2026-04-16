@@ -156,7 +156,7 @@ export default function OnboardingPage() {
       </div>
 
       {/* Progress dots — only show during steps 1-3 */}
-      {step >= 2 && step <= 4 && (
+      {step >= 1 && step <= 4 && (
         <div style={{ display: 'flex', gap: '8px', marginBottom: '40px' }}>
           {[2, 3, 4].map(s => (
             <div key={s} style={{
@@ -257,7 +257,7 @@ export default function OnboardingPage() {
                   <div style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '20px', color: '#B89B5E', flexShrink: 0 }}>{tier.price}</div>
                   <div style={{ width: '18px', height: '18px', borderRadius: '50%', flexShrink: 0, border: `2px solid ${selectedTier === tier.id ? '#B89B5E' : 'rgba(245,243,239,0.2)'}`, background: selectedTier === tier.id ? '#B89B5E' : 'transparent', transition: 'all 0.18s ease' }} />
                 </div>
-                <div style={{ maxHeight: (hoveredType === tier.id || selectedTier === tier.id) ? '300px' : '0px', overflow: 'hidden', transition: 'max-height 0.4s ease', marginTop: (hoveredType === tier.id || selectedTier === tier.id) ? '12px' : '0px' }}>
+                <div style={{ maxHeight: (hoveredType === tier.id || selectedTier === tier.id) ? '300px' : '0px', overflow: 'hidden', transition: 'max-height 0.65s cubic-bezier(0.4, 0, 0.2, 1)', marginTop: (hoveredType === tier.id || selectedTier === tier.id) ? '12px' : '0px' }}>
                   <div style={{ paddingTop: '12px', borderTop: '1px solid rgba(245,243,239,0.08)' }}>
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4px 16px' }}>
                       {tier.features.map((f, i) => (
@@ -525,8 +525,8 @@ export default function OnboardingPage() {
         </div>
       )}
 
-      {/* NAV BUTTONS — steps 1-3 */}
-      {step >= 2 && step <= 4 && (
+      {/* NAV BUTTONS — steps 1-4 */}
+      {step >= 1 && step <= 4 && (
         <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', maxWidth: '560px', marginTop: '40px' }}>
           <button
             onClick={() => setStep((step - 1) as Step)}
@@ -556,9 +556,9 @@ export default function OnboardingPage() {
                 transition: 'all 0.22s ease', fontWeight: 500,
               }}
             >
-              {saving ? 'Saving...' : step === 3 ? 'Complete Setup →' : 'Continue →'}
+              {saving ? 'Saving...' : step === 4 ? 'Complete Setup →' : step === 1 ? 'Secure My Vault →' : 'Continue →'}
             </button>
-            {step < 3 && (
+            {step > 1 && step < 4 && (
               <button
                 onClick={() => setStep((step + 1) as Step)}
                 style={{ background: 'none', border: 'none', color: 'rgba(245,243,239,0.2)', fontSize: '11px', cursor: 'pointer', letterSpacing: '.06em' }}
