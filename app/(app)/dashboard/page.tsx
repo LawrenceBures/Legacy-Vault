@@ -33,13 +33,6 @@ export default function Dashboard() {
     deliveryConfigured: false, plan: '', fullName: '',
   })
   const [loading, setLoading] = useState(true)
-  const [isMobile, setIsMobile] = useState(false)
-  useEffect(() => {
-    const check = () => setIsMobile(window.innerWidth < 768)
-    check()
-    window.addEventListener('resize', check)
-    return () => window.removeEventListener('resize', check)
-  }, [])
 
   useEffect(() => {
     if (isLoaded && !user) router.push('/sign-in')
@@ -84,7 +77,7 @@ export default function Dashboard() {
 
   if (!isLoaded || !user) return null
 
-  const firstName = user.firstName || stats.fullName?.split(' ')[0] || 'there'
+  const firstName = stats.fullName?.split(' ')[0] || user.firstName || user.emailAddresses[0].emailAddress.split('@')[0]
 
   const progressSteps = [stats.vaultEntries > 0, stats.recipients > 0, stats.deliveryConfigured]
   const progressPct = Math.round((progressSteps.filter(Boolean).length / progressSteps.length) * 100)
@@ -95,7 +88,7 @@ export default function Dashboard() {
     { num: stats.deliveryConfigured ? '✓' : '—', label: 'Delivery Trigger', href: '/delivery' },
     { num: '✓', label: 'Vault Status', href: '/dashboard', green: true },
     { num: loading ? '...' : String(stats.delivered), label: 'Delivered', href: '/delivery' },
-    { num: (() => { const p = stats.plan; if (!p || p === 'pro') return '—'; const names: Record<string, string> = { starter_founder: 'Starter Founder', basic_founder: 'Basic Founder', legacy_founder: 'Legacy Founder', family_founder: 'Family Founder', estate_founder: 'Estate Founder', starter: 'Starter', basic: 'Basic', legacy: 'Legacy', family: 'Family', estate: 'Estate' }; return names[p] || p.charAt(0).toUpperCase() + p.slice(1); })(), label: 'PLAN', href: '/account' },
+    { num: (() => { const p = stats.plan; if (!p || p === 'pro' || p === '') return '—'; const names: Record<string, string> = { starter_founder: 'Starter Founder', basic_founder: 'Basic Founder', legacy_founder: 'Legacy Founder', family_founder: 'Family Founder', estate_founder: 'Estate Founder', starter: 'Starter', basic: 'Basic', legacy: 'Legacy', family: 'Family', estate: 'Estate' }; return names[p] || p; })(), label: 'PLAN', href: '/account' },
   ]
 
   const actions = [
@@ -128,8 +121,7 @@ export default function Dashboard() {
         onMouseEnter={() => setSidebarOpen(true)}
         onMouseLeave={() => setSidebarOpen(false)}
         style={{
-          display: isMobile ? 'none' : 'flex', width: sidebarOpen ? '200px' : '64px', background: '#1F2E23',
-          display: 'flex', flexDirection: 'column',
+          display: isMobile ? 'none' : 'flex', flexDirection: 'column', width: sidebarOpen ? '200px' : '64px', background: '#1F2E23',
           alignItems: sidebarOpen ? 'flex-start' : 'center',
           padding: '20px 0', gap: '6px',
           borderRight: '1px solid rgba(184,155,94,0.1)',
