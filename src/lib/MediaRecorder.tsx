@@ -141,14 +141,7 @@ export function VaultMediaRecorder({ type, onRecordingComplete, onCancel }: Medi
     setState('recording')
 
     timerRef.current = setInterval(() => {
-      setDuration(d => {
-        if (d >= 14) {
-          // Auto stop at 15 seconds pre-launch
-          stopRecording()
-          return 15
-        }
-        return d + 1
-      })
+      setDuration(d => d + 1)
     }, 1000)
   }
 
