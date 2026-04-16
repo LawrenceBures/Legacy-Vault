@@ -23,7 +23,7 @@ export default function Dashboard() {
   const [hoveredNav, setHoveredNav] = useState<number | null>(null)
   const [stats, setStats] = useState<Stats>({
     vaultEntries: 0, recipients: 0, delivered: 0,
-    deliveryConfigured: false, plan: 'Pro',
+    deliveryConfigured: false, plan: '','
   })
   const [loading, setLoading] = useState(true)
 
@@ -66,7 +66,7 @@ export default function Dashboard() {
         recipients: recipientsRes.count ?? 0,
         delivered: deliveredRes.count ?? 0,
         deliveryConfigured: deliveryRes.data?.inactivity_enabled || deliveryRes.data?.unlock_enabled || false,
-        plan: profile.plan || 'Pro',
+        plan: profile.plan || '',
       })
     } catch (err) {
       console.error('Error fetching stats:', err)
@@ -81,7 +81,7 @@ export default function Dashboard() {
 
   if (!isLoaded || !user) return null
 
-  const firstName = user.firstName || user.emailAddresses[0].emailAddress.split('@')[0]
+  const firstName = user.firstName || user.lastName || 'there'
 
   const progressSteps = [stats.vaultEntries > 0, stats.recipients > 0, stats.deliveryConfigured]
   const progressPct = Math.round((progressSteps.filter(Boolean).length / progressSteps.length) * 100)
@@ -92,7 +92,7 @@ export default function Dashboard() {
     { num: stats.deliveryConfigured ? '✓' : '—', label: 'Delivery Trigger', href: '/delivery' },
     { num: '✓', label: 'Vault Status', href: '/dashboard', green: true },
     { num: loading ? '...' : String(stats.delivered), label: 'Delivered', href: '/delivery' },
-    { num: stats.plan.charAt(0).toUpperCase() + stats.plan.slice(1), label: 'Plan', href: '/account' },
+    { num: (() => { const p = stats.plan; if (!p || p === 'pro') return '—'; const names: Record<string, string> = { starter_founder: 'Starter Founder', basic_founder: 'Basic Founder', legacy_founder: 'Legacy Founder', family_founder: 'Family Founder', estate_founder: 'Estate Founder', starter: 'Starter', basic: 'Basic', legacy: 'Legacy', family: 'Family', estate: 'Estate' }; return names[p] || p.charAt(0).toUpperCase() + p.slice(1); })(), label: 'PLAN', href: '/account' },
   ]
 
   const actions = [
