@@ -5,13 +5,14 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useState, useCallback } from 'react'
 import { createSupabaseClient } from '@/lib/supabase-auth'
 
-type Step = 0 | 1 | 2 | 3 | 4 // 0=welcome, 1=message, 2=recipient, 3=delivery, 4=complete
+type Step = 0 | 1 | 2 | 3 | 4 | 5 // 0=welcome, 1=tier, 2=message, 3=recipient, 4=delivery, 5=complete
 
 export default function OnboardingPage() {
   const { user, isLoaded } = useUser()
   const { getToken } = useAuth()
   const router = useRouter()
   const [step, setStep] = useState<Step>(0)
+  const [selectedTier, setSelectedTier] = useState<string | null>(null)
   const [entryType, setEntryType] = useState<'video' | 'audio' | 'text' | null>(null)
   const [messageTitle, setMessageTitle] = useState('')
   const [messageContent, setMessageContent] = useState('')
@@ -45,7 +46,7 @@ export default function OnboardingPage() {
         clerk_id: user.id,
         email: user.emailAddresses[0].emailAddress,
         full_name: user.fullName || user.firstName || '',
-        plan: 'pro',
+        plan: selectedTier || 'starter_founder',
         has_completed_onboarding: true,
       }, { onConflict: 'clerk_id' })
 
@@ -101,9 +102,9 @@ export default function OnboardingPage() {
   const firstName = user.firstName || user.emailAddresses[0].emailAddress.split('@')[0]
 
   const entryTypes = [
-    { id: 'video', icon: '🎥', label: 'Video Message', desc: 'The most powerful gift — your face, your voice, your presence.' },
-    { id: 'audio', icon: '🎙️', label: 'Voice Recording', desc: 'Let them hear you, exactly as you are.' },
-    { id: 'text', icon: '✍️', label: 'Written Letter', desc: 'Words that will outlast everything.' },
+    { id: 'video', icon: '🎥', label: 'Video Message', desc: 'The most powerful gift — your face, your voice, your presence.', notice: '15 sec limit until launch' },
+    { id: 'audio', icon: '🎙️', label: 'Voice Recording', desc: 'Let them hear you, exactly as you are.', notice: '15 sec limit until launch' },
+    { id: 'text', icon: '✍️', label: 'Written Letter', desc: 'Words that will outlast everything.', notice: null },
   ]
 
   const relationships = ['Spouse', 'Partner', 'Child', 'Parent', 'Sibling', 'Friend', 'Advisor', 'Other']
@@ -117,9 +118,10 @@ export default function OnboardingPage() {
   }
 
   const canProceed = () => {
-    if (step === 1) return entryType !== null && messageTitle.trim().length > 0
-    if (step === 2) return recipientName.trim().length > 0 && recipientEmail.trim().length > 0
-    if (step === 3) return deliveryType !== null
+    if (step === 1) return selectedTier !== null
+    if (step === 2) return entryType !== null && (messageTitle.trim().length > 0)
+    if (step === 3) return recipientName.trim().length > 0 && recipientEmail.trim().length > 0
+    if (step === 4) return deliveryType !== null
     return true
   }
 
@@ -154,9 +156,9 @@ export default function OnboardingPage() {
       </div>
 
       {/* Progress dots — only show during steps 1-3 */}
-      {step >= 1 && step <= 3 && (
+      {step >= 2 && step <= 4 && (
         <div style={{ display: 'flex', gap: '8px', marginBottom: '40px' }}>
-          {[1, 2, 3].map(s => (
+          {[2, 3, 4].map(s => (
             <div key={s} style={{
               width: s === step ? '24px' : '8px',
               height: '8px', borderRadius: '4px',
@@ -214,12 +216,59 @@ export default function OnboardingPage() {
         </div>
       )}
 
-      {/* STEP 1 — CREATE MESSAGE */}
+      {/* STEP 1 — TIER SELECTION */}
       {step === 1 && (
         <div style={{ width: '100%', maxWidth: '560px' }}>
           <div style={{ marginBottom: '32px' }}>
+            <div style={{ fontSize: '10px', letterSpacing: '.25em', textTransform: 'uppercase', color: 'rgba(184,155,94,0.6)', marginBottom: '12px' }}>Step 1 of 4</div>
+            <div style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '34px', fontWeight: 300, color: '#F5F3EF', lineHeight: 1.2, marginBottom: '10px' }}>Choose your vault plan.</div>
+            <div style={{ fontSize: '14px', color: 'rgba(245,243,239,0.4)', fontFamily: 'Cormorant Garamond, serif', fontStyle: 'italic', lineHeight: 1.7, marginBottom: '8px' }}>
+              You're locking in at founders pricing — grandfathered forever.
+            </div>
+            <div style={{ fontSize: '12px', color: 'rgba(245,243,239,0.25)', fontStyle: 'italic', fontFamily: 'Cormorant Garamond, serif' }}>
+              🚀 Pre-launch: audio and video limited to 15 seconds until May 15, 2026
+            </div>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            {[
+              { id: 'starter_founder', name: 'Starter Vault', price: '$1.99/mo', desc: 'Text messages only · 1 vault · 1 recipient', badge: '✓ Available' },
+              { id: 'basic_founder', name: 'Basic', price: '$4.99/mo', desc: 'Audio (15s pre-launch) · 3 recipients · Milestone Delivery', badge: '✓ Available' },
+              { id: 'legacy_founder', name: 'Legacy', price: '$9.99/mo', desc: 'Audio & video (15s pre-launch) · Unlimited · Full AI assistant', badge: '🔥 Most popular' },
+              { id: 'family_founder', name: 'Family', price: '$19.99/mo', desc: 'Up to 5 vaults · Family Dashboard · 100GB storage', badge: '⚠️ Limited' },
+              { id: 'estate_founder', name: 'Estate', price: '$49.99/mo', desc: 'Attorney-verified · Dedicated manager · Unlimited storage', badge: '🚨 4 spots left' },
+            ].map(tier => (
+              <div key={tier.id}
+                onClick={() => setSelectedTier(tier.id)}
+                style={{
+                  padding: '16px 20px', border: `1px solid ${selectedTier === tier.id ? 'rgba(184,155,94,0.6)' : 'rgba(245,243,239,0.08)'}`,
+                  borderRadius: '8px', background: selectedTier === tier.id ? 'rgba(184,155,94,0.08)' : 'rgba(245,243,239,0.03)',
+                  cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '16px', transition: 'all 0.2s ease',
+                }}
+              >
+                <div style={{ flex: 1 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '3px' }}>
+                    <div style={{ fontSize: '14px', fontWeight: 600, color: '#F5F3EF' }}>{tier.name}</div>
+                    <div style={{ fontSize: '9px', padding: '2px 8px', background: 'rgba(184,155,94,0.1)', color: '#B89B5E', border: '1px solid rgba(184,155,94,0.2)', borderRadius: '20px' }}>{tier.badge}</div>
+                  </div>
+                  <div style={{ fontSize: '12px', color: 'rgba(245,243,239,0.4)', marginBottom: '2px' }}>{tier.desc}</div>
+                </div>
+                <div style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '20px', color: '#B89B5E', flexShrink: 0 }}>{tier.price}</div>
+                <div style={{ width: '18px', height: '18px', borderRadius: '50%', flexShrink: 0, border: `2px solid ${selectedTier === tier.id ? '#B89B5E' : 'rgba(245,243,239,0.2)'}`, background: selectedTier === tier.id ? '#B89B5E' : 'transparent', transition: 'all 0.18s ease' }} />
+              </div>
+            ))}
+          </div>
+          <div style={{ marginTop: '16px', padding: '12px 16px', background: 'rgba(184,155,94,0.06)', border: '1px solid rgba(184,155,94,0.15)', borderRadius: '6px', fontSize: '12px', color: 'rgba(245,243,239,0.4)', fontStyle: 'italic', fontFamily: 'Cormorant Garamond, serif' }}>
+            No credit card required now. You'll be notified at launch on May 15, 2026.
+          </div>
+        </div>
+      )}
+
+      {/* STEP 2 — CREATE MESSAGE */}
+      {step === 5 && (
+        <div style={{ width: '100%', maxWidth: '560px' }}>
+          <div style={{ marginBottom: '32px' }}>
             <div style={{ fontSize: '10px', letterSpacing: '.25em', textTransform: 'uppercase', color: 'rgba(184,155,94,0.6)', marginBottom: '12px' }}>
-              Step 1 of 3
+              Step 2 of 4
             </div>
             <div style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '34px', fontWeight: 300, color: '#F5F3EF', lineHeight: 1.2, marginBottom: '10px' }}>
               What do you want to leave behind?
@@ -304,7 +353,7 @@ export default function OnboardingPage() {
         <div style={{ width: '100%', maxWidth: '560px' }}>
           <div style={{ marginBottom: '32px' }}>
             <div style={{ fontSize: '10px', letterSpacing: '.25em', textTransform: 'uppercase', color: 'rgba(184,155,94,0.6)', marginBottom: '12px' }}>
-              Step 2 of 3
+              Step 3 of 4
             </div>
             <div style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '34px', fontWeight: 300, color: '#F5F3EF', lineHeight: 1.2, marginBottom: '10px' }}>
               Who is this for?
@@ -348,7 +397,7 @@ export default function OnboardingPage() {
         <div style={{ width: '100%', maxWidth: '560px' }}>
           <div style={{ marginBottom: '32px' }}>
             <div style={{ fontSize: '10px', letterSpacing: '.25em', textTransform: 'uppercase', color: 'rgba(184,155,94,0.6)', marginBottom: '12px' }}>
-              Step 3 of 3
+              Step 4 of 4
             </div>
             <div style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '34px', fontWeight: 300, color: '#F5F3EF', lineHeight: 1.2, marginBottom: '10px' }}>
               When should it be opened?
@@ -462,7 +511,7 @@ export default function OnboardingPage() {
       )}
 
       {/* NAV BUTTONS — steps 1-3 */}
-      {step >= 1 && step <= 3 && (
+      {step >= 2 && step <= 4 && (
         <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', maxWidth: '560px', marginTop: '40px' }}>
           <button
             onClick={() => setStep((step - 1) as Step)}
@@ -478,7 +527,7 @@ export default function OnboardingPage() {
 
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '8px' }}>
             <button
-              onClick={() => step === 3 ? handleComplete() : setStep((step + 1) as Step)}
+              onClick={() => step === 4 ? handleComplete() : setStep((step + 1) as Step)}
               disabled={!canProceed() || saving}
               onMouseEnter={() => setHoveredBtn('next')}
               onMouseLeave={() => setHoveredBtn(null)}
