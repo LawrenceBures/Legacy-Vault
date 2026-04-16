@@ -15,7 +15,7 @@ export default function AboutPage() {
   ]
 
   const team = [
-    { initials: 'LB', name: 'Lawrence Bures', role: 'Founder & CEO', bio: 'Cortez built Legacy Vault after realizing the most important conversations in his life had never been had. A screenwriter and entrepreneur, he believes the stories we leave behind matter as much as the ones we tell while we\'re here.' },
+    { initials: 'LB', name: 'Lawrence Bures', role: 'Founder & CEO', bio: 'Lawrence built Legacy Vault after realizing the most important conversations in his life had never been had. A screenwriter and entrepreneur, he believes the stories we leave behind matter as much as the ones we tell while we\'re here.' },
   ]
 
   return (
@@ -63,7 +63,6 @@ export default function AboutPage() {
             </p>
           </div>
           <div style={{ marginTop: '2.5rem', display: 'flex', alignItems: 'center', gap: '16px' }}>
-            <div style={{ width: '52px', height: '52px', borderRadius: '50%', background: 'rgba(184,155,94,0.15)', border: '1px solid rgba(184,155,94,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '16px', fontWeight: 600, color: '#B89B5E', fontFamily: 'DM Sans, sans-serif' }}>CB</div>
             <div>
               <div style={{ fontSize: '14px', fontWeight: 600, color: '#1F2E23' }}>Lawrence Bures</div>
               <div style={{ fontSize: '12px', color: 'rgba(31,46,35,0.45)', letterSpacing: '.04em' }}>Founder, Legacy Vault</div>
