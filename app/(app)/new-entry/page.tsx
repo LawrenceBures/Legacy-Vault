@@ -7,6 +7,7 @@ import { createSupabaseClient } from '@/lib/supabase-auth'
 import { AIWritingAssistant } from '@/lib/AIWritingAssistant'
 import { VaultMediaRecorder } from '@/lib/MediaRecorder'
 import { VideoAssist } from '@/lib/VideoAssist'
+import { canUseVideo, canUseAudio, canUseAI, getUpgradeMessage } from '@/lib/featureGating'
 
 type EntryType = 'video' | 'audio' | 'text' | null
 type Step = 1 | 2 | 3 | 4
@@ -15,6 +16,15 @@ export default function NewEntryPage() {
   const { user, isLoaded } = useUser()
   const { getToken } = useAuth()
   const router = useRouter()
+
+  useEffect(() => {
+    if (user) {
+      fetch(`/api/dashboard?clerk_id=${user.id}&email=${user.emailAddresses[0].emailAddress}&full_name=${user.fullName || ''}`)
+        .then(r => r.json())
+        .then(d => setUserPlan(d.plan || ''))
+        .catch(console.error)
+    }
+  }, [user])
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [hoveredNav, setHoveredNav] = useState<number | null>(null)
   const [step, setStep] = useState<Step>(1)
@@ -31,6 +41,7 @@ export default function NewEntryPage() {
   const [recordedUrl, setRecordedUrl] = useState<string | null>(null)
   const [showRecorder, setShowRecorder] = useState(false)
   const [showVideoAssist, setShowVideoAssist] = useState(false)
+  const [userPlan, setUserPlan] = useState('')
   const [saveError, setSaveError] = useState('')
   const fileInputRef = useRef<HTMLInputElement>(null)
 
