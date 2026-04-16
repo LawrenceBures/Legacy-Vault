@@ -6,11 +6,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <ErrorBoundary>
       <ToastProvider>
-        <div style={{ paddingTop: '44px' }}>
-          <CountdownBanner />
-          <TrustBanner />
-          {children}
-        </div>
+        <CountdownBanner />
+        <TrustBanner />
+        {children}
       </ToastProvider>
     </ErrorBoundary>
   )
