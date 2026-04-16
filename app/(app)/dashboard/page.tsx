@@ -318,7 +318,6 @@ export default function Dashboard() {
 
         </div>
       </main>
-    </div>
 
       {/* Mobile Bottom Nav */}
       {isMobile && (

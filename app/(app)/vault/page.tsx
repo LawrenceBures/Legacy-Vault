@@ -1,6 +1,5 @@
 'use client'
 
-import { useEffect, useState as useMobileState } from 'react'
 
 import { useUser, UserButton, useAuth } from '@clerk/nextjs'
 import { useRouter } from 'next/navigation'
