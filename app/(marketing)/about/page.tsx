@@ -113,7 +113,6 @@ export default function AboutPage() {
           </div>
           {team.map((member, i) => (
             <div key={i} style={{ background: '#fff', border: '1px solid rgba(31,46,35,0.08)', borderRadius: '10px', padding: '2.5rem', display: 'flex', gap: '2rem', alignItems: 'flex-start' }}>
-              <div style={{ width: '72px', height: '72px', borderRadius: '50%', background: 'rgba(184,155,94,0.12)', border: '1px solid rgba(184,155,94,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px', fontWeight: 600, color: '#B89B5E', flexShrink: 0 }}>{member.initials}</div>
               <div>
                 <div style={{ fontSize: '18px', fontWeight: 600, color: '#1F2E23', marginBottom: '.25rem' }}>{member.name}</div>
                 <div style={{ fontSize: '12px', color: '#B89B5E', letterSpacing: '.08em', textTransform: 'uppercase', marginBottom: '1rem' }}>{member.role}</div>
