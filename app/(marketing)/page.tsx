@@ -96,6 +96,8 @@ export default function LandingPage() {
         </div>
       </section>
 
+      <FoundersSection />
+
       <section style={{ padding: '100px 40px', background: '#F5F3EF' }}>
         <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
           <div style={{ textAlign: 'center', marginBottom: '4rem' }}>

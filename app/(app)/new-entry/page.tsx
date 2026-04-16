@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useState, useRef, useCallback } from 'react'
 import { createSupabaseClient } from '@/lib/supabase-auth'
 import { AIWritingAssistant } from '@/lib/AIWritingAssistant'
+import { VaultMediaRecorder } from '@/lib/MediaRecorder'
 
 type EntryType = 'video' | 'audio' | 'text' | null
 type Step = 1 | 2 | 3 | 4
@@ -25,6 +26,9 @@ export default function NewEntryPage() {
   const [hoveredType, setHoveredType] = useState<string | null>(null)
   const [hoveredBtn, setHoveredBtn] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
+  const [recordedBlob, setRecordedBlob] = useState<Blob | null>(null)
+  const [recordedUrl, setRecordedUrl] = useState<string | null>(null)
+  const [showRecorder, setShowRecorder] = useState(false)
   const [saveError, setSaveError] = useState('')
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -378,42 +382,46 @@ export default function NewEntryPage() {
 
                   <div style={{ textAlign: 'center', fontSize: '11px', color: 'rgba(31,46,35,0.3)', letterSpacing: '.08em' }}>— OR —</div>
 
-                  {/* Record — fixed re-record */}
-                  <div
-                    onClick={() => {
-                      if (recorded) {
-                        // Re-record: reset state
-                        setRecorded(false)
-                        setRecording(false)
-                        setUploadedFile(null)
-                      } else if (recording) {
-                        // Stop recording
-                        setRecording(false)
-                        setRecorded(true)
-                      } else {
-                        // Start recording
-                        setRecording(true)
-                        setUploadedFile(null)
-                      }
-                    }}
-                    onMouseEnter={() => setHoveredBtn('record')} onMouseLeave={() => setHoveredBtn(null)}
-                    style={{
-                      border: `1px solid ${recorded ? '#B89B5E' : recording ? '#e74c3c' : hoveredBtn === 'record' ? 'rgba(184,155,94,0.4)' : 'rgba(31,46,35,0.12)'}`,
-                      borderRadius: '6px', padding: '24px', textAlign: 'center', cursor: 'pointer',
-                      background: recorded ? 'rgba(184,155,94,0.04)' : recording ? 'rgba(231,76,60,0.04)' : '#fff',
-                      transition: 'all 0.2s ease',
-                    }}
-                  >
-                    <div style={{ fontSize: '28px', marginBottom: '10px' }}>
-                      {recorded ? '✅' : recording ? '⏹️' : '🎙️'}
+                  {/* Real recorder */}
+                  {!showRecorder && !recordedBlob && (
+                    <div onClick={() => { setShowRecorder(true); setUploadedFile(null) }}
+                      onMouseEnter={() => setHoveredBtn('record')} onMouseLeave={() => setHoveredBtn(null)}
+                      style={{ border: `1px solid ${hoveredBtn === 'record' ? 'rgba(184,155,94,0.4)' : 'rgba(31,46,35,0.12)'}`, borderRadius: '6px', padding: '24px', textAlign: 'center', cursor: 'pointer', background: '#fff', transition: 'all 0.2s ease' }}>
+                      <div style={{ fontSize: '28px', marginBottom: '10px' }}>{entryType === 'video' ? '🎥' : '🎙️'}</div>
+                      <div style={{ fontSize: '13px', color: '#1F2E23', fontWeight: 500, marginBottom: '4px' }}>Record {entryType} now</div>
+                      <div style={{ fontSize: '11px', color: 'rgba(31,46,35,0.4)' }}>Uses your browser {entryType === 'video' ? 'camera & microphone' : 'microphone'}</div>
                     </div>
-                    <div style={{ fontSize: '13px', color: recording ? '#e74c3c' : '#1F2E23', fontWeight: 500, marginBottom: '4px' }}>
-                      {recorded ? 'Recording saved' : recording ? 'Recording... Click to stop' : `Record ${entryType} now`}
+                  )}
+
+                  {showRecorder && !recordedBlob && entryType && (
+                    <VaultMediaRecorder
+                      type={entryType as 'video' | 'audio'}
+                      onRecordingComplete={(blob, url) => { setRecordedBlob(blob); setRecordedUrl(url); setRecorded(true); setShowRecorder(false); setUploadedFile(null) }}
+                      onCancel={() => setShowRecorder(false)}
+                    />
+                  )}
+
+                  {recordedBlob && (
+                    <div style={{ border: '1px solid rgba(184,155,94,0.4)', borderRadius: '6px', padding: '16px', background: 'rgba(184,155,94,0.04)' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
+                        <div style={{ fontSize: '24px' }}>✅</div>
+                        <div>
+                          <div style={{ fontSize: '13px', fontWeight: 500, color: '#1F2E23' }}>Recording saved</div>
+                          <div style={{ fontSize: '11px', color: 'rgba(31,46,35,0.4)' }}>Will upload when you save your entry</div>
+                        </div>
+                        <button onClick={() => { setRecordedBlob(null); setRecordedUrl(null); setRecorded(false) }}
+                          style={{ marginLeft: 'auto', padding: '6px 12px', border: '1px solid rgba(31,46,35,0.15)', borderRadius: '4px', background: 'transparent', color: 'rgba(31,46,35,0.5)', fontSize: '10px', cursor: 'pointer', letterSpacing: '.08em', textTransform: 'uppercase' }}>
+                          Re-record
+                        </button>
+                      </div>
+                      {entryType === 'video' && recordedUrl && (
+                        <video src={recordedUrl} controls style={{ width: '100%', borderRadius: '4px', maxHeight: '200px' }} />
+                      )}
+                      {entryType === 'audio' && recordedUrl && (
+                        <audio src={recordedUrl} controls style={{ width: '100%' }} />
+                      )}
                     </div>
-                    <div style={{ fontSize: '11px', color: recorded ? '#B89B5E' : 'rgba(31,46,35,0.4)' }}>
-                      {recorded ? 'Click to re-record' : recording ? 'Click when finished' : 'Uses your browser microphone' + (entryType === 'video' ? ' & camera' : '')}
-                    </div>
-                  </div>
+                  )}
                 </div>
               )}
             </div>
