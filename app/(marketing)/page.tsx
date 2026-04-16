@@ -78,6 +78,7 @@ export default function LandingPage() {
               onMouseLeave={e => (e.currentTarget.style.color = 'rgba(245,243,239,0.5)')}
             >{item}</a>
           ))}
+          {isMobile && <a href='/about' style={{ fontSize: '12px', color: 'rgba(245,243,239,0.5)', textDecoration: 'none', letterSpacing: '.06em' }}>About</a>}
           <button onClick={() => router.push('/sign-in')} style={{ padding: '9px 22px', background: 'transparent', color: '#B89B5E', border: '1px solid rgba(184,155,94,0.4)', borderRadius: '4px', fontSize: '12px', letterSpacing: '.1em', textTransform: 'uppercase', cursor: 'pointer', fontWeight: 500 }}>Sign in</button>
           <button onClick={() => router.push('/sign-up')} style={{ padding: '9px 22px', background: '#B89B5E', color: '#1F2E23', border: 'none', borderRadius: '4px', fontSize: '12px', letterSpacing: '.1em', textTransform: 'uppercase', cursor: 'pointer', fontWeight: 700 }}>Lock in price</button>
         </div>

@@ -166,13 +166,13 @@ export function FoundersSection() {
 export function CountdownBanner() {
   const timeLeft = useCountdown()
   return (
-    <div style={{ background: '#B89B5E', padding: '10px 20px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+    <div style={{ background: '#B89B5E', padding: '10px 16px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', flexWrap: 'wrap', minHeight: '44px' }}>
       <div style={{ fontSize: '12px', fontWeight: 700, color: '#1F2E23', letterSpacing: '.08em' }}>🔒 FOUNDERS PRICING ENDS AT LAUNCH</div>
       <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
         {[{ value: timeLeft.days, label: 'days' }, { value: timeLeft.hours, label: 'hrs' }, { value: timeLeft.minutes, label: 'min' }, { value: timeLeft.seconds, label: 'sec' }].map(({ value, label }, i) => (
           <div key={label} style={{ display: 'flex', alignItems: 'baseline', gap: '3px' }}>
             {i > 0 && <span style={{ color: 'rgba(31,46,35,0.4)', fontSize: '14px' }}>:</span>}
-            <span style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '20px', fontWeight: 600, color: '#1F2E23' }}>{String(value).padStart(2, '0')}</span>
+            <span style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '16px', fontWeight: 600, color: '#1F2E23' }}>{String(value).padStart(2, '0')}</span>
             <span style={{ fontSize: '9px', color: 'rgba(31,46,35,0.5)', letterSpacing: '.08em' }}>{label}</span>
           </div>
         ))}
