@@ -166,7 +166,7 @@ export function FoundersSection() {
 export function CountdownBanner() {
   const timeLeft = useCountdown()
   return (
-    <div style={{ background: '#B89B5E', padding: '10px 16px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', flexWrap: 'wrap', minHeight: '44px' }}>
+    <div style={{ background: '#B89B5E', padding: '10px 16px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', flexWrap: 'wrap', minHeight: '44px', marginTop: '64px' }}>
       <div style={{ fontSize: '11px', fontWeight: 700, color: '#1F2E23', letterSpacing: '.06em' }}>🔒 FOUNDERS PRICING ENDS AT LAUNCH</div>
       <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
         {[{ value: timeLeft.days, label: 'days' }, { value: timeLeft.hours, label: 'hrs' }, { value: timeLeft.minutes, label: 'min' }, { value: timeLeft.seconds, label: 'sec' }].map(({ value, label }, i) => (
