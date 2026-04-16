@@ -23,7 +23,7 @@ export default function Dashboard() {
   const [hoveredNav, setHoveredNav] = useState<number | null>(null)
   const [stats, setStats] = useState<Stats>({
     vaultEntries: 0, recipients: 0, delivered: 0,
-    deliveryConfigured: false, plan: '','
+    deliveryConfigured: false, plan: '',
   })
   const [loading, setLoading] = useState(true)
 
