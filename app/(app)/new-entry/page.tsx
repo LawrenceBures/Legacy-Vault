@@ -4,6 +4,7 @@ import { useUser, UserButton, useAuth } from '@clerk/nextjs'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState, useRef, useCallback } from 'react'
 import { createSupabaseClient } from '@/lib/supabase-auth'
+import { AIWritingAssistant } from '@/lib/AIWritingAssistant'
 
 type EntryType = 'video' | 'audio' | 'text' | null
 type Step = 1 | 2 | 3 | 4
@@ -341,8 +342,15 @@ export default function NewEntryPage() {
               </div>
 
               {entryType === 'text' && (
-                <textarea placeholder="Dear..." value={message} onChange={e => setMessage(e.target.value)} rows={12}
+                <div>
+                  <AIWritingAssistant
+                    onUseMessage={(text) => setMessage(text)}
+                    recipientName={undefined}
+                    entryTitle={title}
+                  />
+                  <textarea placeholder="Dear..."  value={message} onChange={e => setMessage(e.target.value)} rows={12}
                   style={{ ...inputStyle, resize: 'vertical', minHeight: '280px', fontFamily: 'Cormorant Garamond, serif', fontSize: '16px', lineHeight: 1.8 }} />
+                </div>
               )}
 
               {(entryType === 'video' || entryType === 'audio') && (
