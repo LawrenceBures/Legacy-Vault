@@ -12,6 +12,23 @@ export async function POST(req: NextRequest) {
     if (!name || !email || !tier) return NextResponse.json({ error: 'Name, email and tier are required' }, { status: 400 })
     const { error } = await supabase.from('waitlist').insert({ name, email, phone, tier, created_at: new Date().toISOString() })
     if (error) throw error
+
+    // Send confirmation email
+    try {
+      await fetch(`${process.env.NEXT_PUBLIC_SITE_URL || 'https://joinlegacyvault.com'}/api/email`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'waitlist_confirmation',
+          to: email,
+          name,
+          tier,
+        }),
+      })
+    } catch (emailErr) {
+      console.error('Email send failed:', emailErr)
+    }
+
     return NextResponse.json({ success: true })
   } catch (err) {
     console.error('Waitlist error:', err)
