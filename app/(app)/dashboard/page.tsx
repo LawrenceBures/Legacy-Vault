@@ -251,6 +251,21 @@ export default function Dashboard() {
           {/* ACTIONS */}
           <div style={{ padding: '20px', borderRight: '1px solid rgba(31,46,35,0.08)' }}>
             <div style={{ fontSize: '9px', letterSpacing: '.22em', textTransform: 'uppercase', color: 'rgba(31,46,35,0.35)', marginBottom: '12px', paddingBottom: '10px', borderBottom: '1px solid rgba(31,46,35,0.07)' }}>
+              {(!stats.plan || stats.plan === "" || stats.plan === "pro") && (
+                <div style={{ background: "#1F2E23", border: "1px solid rgba(184,155,94,0.2)", borderRadius: "10px", padding: "1.5rem", marginBottom: "1.5rem" }}>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "1rem" }}>
+                    <div>
+                      <div style={{ fontFamily: "Cormorant Garamond, serif", fontSize: "20px", fontWeight: 300, color: "#F5F3EF", marginBottom: "4px" }}>Lock in your founders price</div>
+                      <div style={{ fontSize: "13px", color: "rgba(245,243,239,0.45)" }}>Grandfathered pricing forever · Launches May 15, 2026</div>
+                    </div>
+                    <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+                      {[{tier:"starter_founder",label:"Starter",price:"$1.99"},{tier:"basic_founder",label:"Basic",price:"$4.99"},{tier:"legacy_founder",label:"Legacy",price:"$9.99"},{tier:"family_founder",label:"Family",price:"$19.99"},{tier:"estate_founder",label:"Estate",price:"$49.99"}].map(plan => (
+                        <button key={plan.tier} onClick={() => handleUpgrade(plan.tier)} style={{ padding: "8px 14px", background: plan.tier === "legacy_founder" ? "#B89B5E" : "transparent", color: plan.tier === "legacy_founder" ? "#1F2E23" : "#B89B5E", border: "1px solid rgba(184,155,94,0.3)", borderRadius: "4px", fontSize: "11px", cursor: "pointer", fontWeight: plan.tier === "legacy_founder" ? 700 : 500 }}>{plan.label} {plan.price}</button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
               Quick Actions
             </div>
             {actions.map((action, i) => (
