@@ -47,7 +47,6 @@ export default function Dashboard() {
         clerk_id: user.id,
         email: user.emailAddresses[0].emailAddress,
         full_name: user.fullName || user.firstName || '',
-        plan: 'pro',
         last_active: new Date().toISOString(),
       }, { onConflict: 'clerk_id' })
 
