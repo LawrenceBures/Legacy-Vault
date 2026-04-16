@@ -257,8 +257,8 @@ export default function OnboardingPage() {
                   <div style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '20px', color: '#B89B5E', flexShrink: 0 }}>{tier.price}</div>
                   <div style={{ width: '18px', height: '18px', borderRadius: '50%', flexShrink: 0, border: `2px solid ${selectedTier === tier.id ? '#B89B5E' : 'rgba(245,243,239,0.2)'}`, background: selectedTier === tier.id ? '#B89B5E' : 'transparent', transition: 'all 0.18s ease' }} />
                 </div>
-                {(hoveredType === tier.id || selectedTier === tier.id) && (
-                  <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px solid rgba(245,243,239,0.08)' }}>
+                <div style={{ maxHeight: (hoveredType === tier.id || selectedTier === tier.id) ? '300px' : '0px', overflow: 'hidden', transition: 'max-height 0.4s ease', marginTop: (hoveredType === tier.id || selectedTier === tier.id) ? '12px' : '0px' }}>
+                  <div style={{ paddingTop: '12px', borderTop: '1px solid rgba(245,243,239,0.08)' }}>
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4px 16px' }}>
                       {tier.features.map((f, i) => (
                         <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '6px' }}>
@@ -268,7 +268,7 @@ export default function OnboardingPage() {
                       ))}
                     </div>
                   </div>
-                )}
+                </div>
               </div>
             ))}
           </div>
