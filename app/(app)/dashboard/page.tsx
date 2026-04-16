@@ -20,12 +20,26 @@ export default function Dashboard() {
   const [hoveredStat, setHoveredStat] = useState<number | null>(null)
   const [hoveredAction, setHoveredAction] = useState<number | null>(null)
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768)
+    check()
+    window.addEventListener('resize', check)
+    return () => window.removeEventListener('resize', check)
+  }, [])
   const [hoveredNav, setHoveredNav] = useState<number | null>(null)
   const [stats, setStats] = useState<Stats>({
     vaultEntries: 0, recipients: 0, delivered: 0,
     deliveryConfigured: false, plan: '', fullName: '',
   })
   const [loading, setLoading] = useState(true)
+  const [isMobile, setIsMobile] = useState(false)
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768)
+    check()
+    window.addEventListener('resize', check)
+    return () => window.removeEventListener('resize', check)
+  }, [])
 
   useEffect(() => {
     if (isLoaded && !user) router.push('/sign-in')
@@ -107,7 +121,7 @@ export default function Dashboard() {
         onMouseEnter={() => setSidebarOpen(true)}
         onMouseLeave={() => setSidebarOpen(false)}
         style={{
-          width: sidebarOpen ? '200px' : '64px', background: '#1F2E23',
+          display: isMobile ? 'none' : 'flex', width: sidebarOpen ? '200px' : '64px', background: '#1F2E23',
           display: 'flex', flexDirection: 'column',
           alignItems: sidebarOpen ? 'flex-start' : 'center',
           padding: '20px 0', gap: '6px',
@@ -304,6 +318,33 @@ export default function Dashboard() {
 
         </div>
       </main>
+    </div>
+
+      {/* Mobile Bottom Nav */}
+      {isMobile && (
+        <div style={{
+          position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 100,
+          background: '#1F2E23', borderTop: '1px solid rgba(184,155,94,0.15)',
+          display: 'flex', alignItems: 'center', justifyContent: 'space-around',
+          padding: '8px 0', height: '60px',
+        }}>
+          {[
+            { icon: '⊞', label: 'Dashboard', href: '/dashboard' },
+            { icon: '🔒', label: 'Vault', href: '/vault' },
+            { icon: '+', label: 'New', href: '/new-entry' },
+            { icon: '👥', label: 'People', href: '/my-people' },
+            { icon: '⏱', label: 'Delivery', href: '/delivery' },
+          ].map(item => (
+            <a key={item.href} href={item.href} style={{
+              display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px',
+              textDecoration: 'none', flex: 1,
+            }}>
+              <div style={{ fontSize: item.icon === '+' ? '22px' : '16px', color: '#B89B5E' }}>{item.icon}</div>
+              <div style={{ fontSize: '9px', color: 'rgba(245,243,239,0.5)', letterSpacing: '.04em' }}>{item.label}</div>
+            </a>
+          ))}
+        </div>
+      )}
     </div>
   )
 }
