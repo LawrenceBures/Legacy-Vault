@@ -96,7 +96,7 @@ export default function Dashboard() {
 
   if (!isLoaded || !user) return null
 
-  const firstName = stats.fullName?.split(' ')[0] || user.firstName || user.emailAddresses[0].emailAddress.split('@')[0]
+  const firstName = stats.fullName ? stats.fullName.split(' ')[0] : user.firstName ? user.firstName : 'Lawrence'
 
   const progressSteps = [stats.vaultEntries > 0, stats.recipients > 0, stats.deliveryConfigured]
   const progressPct = Math.round((progressSteps.filter(Boolean).length / progressSteps.length) * 100)
