@@ -16,7 +16,6 @@ type Stats = {
 
 export default function Dashboard() {
   const { user, isLoaded } = useUser()
-  const { getToken } = useAuth()
   const router = useRouter()
   const [hoveredStat, setHoveredStat] = useState<number | null>(null)
   const [hoveredAction, setHoveredAction] = useState<number | null>(null)
@@ -32,49 +31,31 @@ export default function Dashboard() {
     if (isLoaded && !user) router.push('/sign-in')
   }, [isLoaded, user, router])
 
-  const getSupabase = useCallback(async () => {
-    const token = await getToken({ template: 'supabase' })
-    return createSupabaseClient(token!)
-  }, [getToken])
-
   const fetchStats = useCallback(async () => {
     if (!user) return
     try {
-      const supabase = await getSupabase()
-
-      await supabase.from('profiles').upsert({
-        id: crypto.randomUUID(),
+      const params = new URLSearchParams({
         clerk_id: user.id,
         email: user.emailAddresses[0].emailAddress,
         full_name: user.fullName || user.firstName || '',
-        last_active: new Date().toISOString(),
-      }, { onConflict: 'clerk_id' })
-
-      const profileRes = await fetch(`/api/profile?clerk_id=${user.id}`)
-      const profile = profileRes.ok ? await profileRes.json() : null
-      if (!profile) return
-
-      const [entriesRes, recipientsRes, deliveredRes, deliveryRes] = await Promise.all([
-        supabase.from('vault_entries').select('id', { count: 'exact' }).eq('user_id', profile.id),
-        supabase.from('recipients').select('id', { count: 'exact' }).eq('user_id', profile.id),
-        supabase.from('delivery_events').select('id', { count: 'exact' }).eq('status', 'delivered'),
-        supabase.from('delivery_settings').select('inactivity_enabled, unlock_enabled').eq('user_id', profile.id).single(),
-      ])
-
+      })
+      const res = await fetch(`/api/dashboard?${params}`)
+      if (!res.ok) return
+      const data = await res.json()
       setStats({
-        vaultEntries: entriesRes.count ?? 0,
-        recipients: recipientsRes.count ?? 0,
-        delivered: deliveredRes.count ?? 0,
-        deliveryConfigured: deliveryRes.data?.inactivity_enabled || deliveryRes.data?.unlock_enabled || false,
-        plan: profile.plan || '',
-        fullName: profile.full_name || '',
+        vaultEntries: data.vaultEntries ?? 0,
+        recipients: data.recipients ?? 0,
+        delivered: data.delivered ?? 0,
+        deliveryConfigured: data.deliveryConfigured ?? false,
+        plan: data.plan || '',
+        fullName: data.fullName || '',
       })
     } catch (err) {
       console.error('Error fetching stats:', err)
     } finally {
       setLoading(false)
     }
-  }, [user, getSupabase])
+  }, [user])
 
   useEffect(() => {
     if (isLoaded && user) fetchStats()
