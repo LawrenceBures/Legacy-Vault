@@ -75,6 +75,25 @@ export default function Dashboard() {
     if (isLoaded && user) fetchStats()
   }, [isLoaded, user, fetchStats])
 
+  const handleUpgrade = async (tier: string) => {
+    if (!user) return
+    try {
+      const res = await fetch('/api/stripe/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          tier,
+          clerk_id: user.id,
+          email: user.emailAddresses[0].emailAddress,
+        }),
+      })
+      const data = await res.json()
+      if (data.url) window.location.href = data.url
+    } catch (err) {
+      console.error('Upgrade error:', err)
+    }
+  }
+
   if (!isLoaded || !user) return null
 
   const firstName = stats.fullName?.split(' ')[0] || user.firstName || user.emailAddresses[0].emailAddress.split('@')[0]
