@@ -11,6 +11,7 @@ type Stats = {
   delivered: number
   deliveryConfigured: boolean
   plan: string
+  fullName: string
 }
 
 export default function Dashboard() {
@@ -23,7 +24,7 @@ export default function Dashboard() {
   const [hoveredNav, setHoveredNav] = useState<number | null>(null)
   const [stats, setStats] = useState<Stats>({
     vaultEntries: 0, recipients: 0, delivered: 0,
-    deliveryConfigured: false, plan: '',
+    deliveryConfigured: false, plan: '', fullName: '',
   })
   const [loading, setLoading] = useState(true)
 
@@ -50,8 +51,8 @@ export default function Dashboard() {
         last_active: new Date().toISOString(),
       }, { onConflict: 'clerk_id' })
 
-      const { data: profile } = await supabase
-        .from('profiles').select('id, plan').eq('clerk_id', user.id).single()
+      const profileRes = await fetch(`/api/profile?clerk_id=${user.id}`)
+      const profile = profileRes.ok ? await profileRes.json() : null
       if (!profile) return
 
       const [entriesRes, recipientsRes, deliveredRes, deliveryRes] = await Promise.all([
@@ -67,6 +68,7 @@ export default function Dashboard() {
         delivered: deliveredRes.count ?? 0,
         deliveryConfigured: deliveryRes.data?.inactivity_enabled || deliveryRes.data?.unlock_enabled || false,
         plan: profile.plan || '',
+        fullName: profile.full_name || '',
       })
     } catch (err) {
       console.error('Error fetching stats:', err)
@@ -81,7 +83,7 @@ export default function Dashboard() {
 
   if (!isLoaded || !user) return null
 
-  const firstName = user.firstName || user.lastName || 'there'
+  const firstName = user.firstName || stats.fullName?.split(' ')[0] || 'there'
 
   const progressSteps = [stats.vaultEntries > 0, stats.recipients > 0, stats.deliveryConfigured]
   const progressPct = Math.round((progressSteps.filter(Boolean).length / progressSteps.length) * 100)
