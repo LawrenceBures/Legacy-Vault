@@ -216,7 +216,7 @@ export default function VaultPage() {
             Loading your vault...
           </div>
         ) : filteredEntries.length > 0 ? (
-          <div style={{ padding: '24px 28px', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(300px, 100%), 1fr))', gap: '16px' }}>
+          <div style={{ padding: '24px 28px', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(280px, 100%), 1fr))', gap: '16px' }}>
             {filteredEntries.map((entry) => (
               <div key={entry.id}
                 onMouseEnter={() => setHoveredCard(entry.id)}
