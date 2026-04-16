@@ -6,6 +6,7 @@ import { useEffect, useState, useRef, useCallback } from 'react'
 import { createSupabaseClient } from '@/lib/supabase-auth'
 import { AIWritingAssistant } from '@/lib/AIWritingAssistant'
 import { VaultMediaRecorder } from '@/lib/MediaRecorder'
+import { VideoAssist } from '@/lib/VideoAssist'
 
 type EntryType = 'video' | 'audio' | 'text' | null
 type Step = 1 | 2 | 3 | 4
@@ -29,6 +30,7 @@ export default function NewEntryPage() {
   const [recordedBlob, setRecordedBlob] = useState<Blob | null>(null)
   const [recordedUrl, setRecordedUrl] = useState<string | null>(null)
   const [showRecorder, setShowRecorder] = useState(false)
+  const [showVideoAssist, setShowVideoAssist] = useState(false)
   const [saveError, setSaveError] = useState('')
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -383,12 +385,26 @@ export default function NewEntryPage() {
                   <div style={{ textAlign: 'center', fontSize: '11px', color: 'rgba(31,46,35,0.3)', letterSpacing: '.08em' }}>— OR —</div>
 
                   {/* Real recorder */}
+                  {entryType === 'video' && showVideoAssist && (
+                    <VideoAssist
+                      entryTitle={title}
+                      recipientName={undefined}
+                      onClose={() => setShowVideoAssist(false)}
+                    />
+                  )}
+
                   {!showRecorder && !recordedBlob && (
                     <div onClick={() => { setShowRecorder(true); setUploadedFile(null) }}
                       onMouseEnter={() => setHoveredBtn('record')} onMouseLeave={() => setHoveredBtn(null)}
                       style={{ border: `1px solid ${hoveredBtn === 'record' ? 'rgba(184,155,94,0.4)' : 'rgba(31,46,35,0.12)'}`, borderRadius: '6px', padding: '24px', textAlign: 'center', cursor: 'pointer', background: '#fff', transition: 'all 0.2s ease' }}>
                       <div style={{ fontSize: '28px', marginBottom: '10px' }}>{entryType === 'video' ? '🎥' : '🎙️'}</div>
                       <div style={{ fontSize: '13px', color: '#1F2E23', fontWeight: 500, marginBottom: '4px' }}>Record {entryType} now</div>
+                      {entryType === 'video' && !showVideoAssist && (
+                        <div onClick={(e) => { e.stopPropagation(); setShowVideoAssist(true) }}
+                          style={{ fontSize: '11px', color: '#B89B5E', marginTop: '6px', cursor: 'pointer', letterSpacing: '.06em' }}>
+                          ✨ Give me something to say
+                        </div>
+                      )}
                       <div style={{ fontSize: '11px', color: 'rgba(31,46,35,0.4)' }}>Uses your browser {entryType === 'video' ? 'camera & microphone' : 'microphone'}</div>
                     </div>
                   )}
