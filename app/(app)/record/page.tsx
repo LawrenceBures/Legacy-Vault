@@ -1,12 +1,12 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useAuth, useUser } from '@clerk/nextjs'
 import { VaultMediaRecorder } from '@/lib/MediaRecorder'
 import { createSupabaseClient } from '@/lib/supabase-auth'
 
-export default function RecordPage() {
+function RecordPageInner() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const type = (searchParams.get('type') || 'video') as 'video' | 'audio'
@@ -99,5 +99,13 @@ export default function RecordPage() {
         )}
       </div>
     </div>
+  )
+}
+
+export default function RecordPage() {
+  return (
+    <Suspense fallback={<div style={{ minHeight: '100vh', background: '#F5F3EF', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#1F2E23' }}>Loading...</div>}>
+      <RecordPageInner />
+    </Suspense>
   )
 }
