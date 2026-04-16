@@ -35,6 +35,13 @@ function useCountdown() {
 
 export function FoundersSection() {
   const timeLeft = useCountdown()
+  const [isMobile, setIsMobile] = useState(false)
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768)
+    check()
+    window.addEventListener('resize', check)
+    return () => window.removeEventListener('resize', check)
+  }, [])
   const [vaultCount, setVaultCount] = useState(847)
   const [selectedTier, setSelectedTier] = useState<string | null>(null)
   const [form, setForm] = useState({ name: '', email: '', phone: '' })
@@ -71,18 +78,18 @@ export function FoundersSection() {
   const inputStyle = { width: '100%', padding: '14px 16px', border: '1px solid rgba(184,155,94,0.3)', borderRadius: '6px', background: 'rgba(245,243,239,0.06)', color: '#F5F3EF', fontFamily: 'DM Sans, sans-serif', fontSize: '14px', outline: 'none', boxSizing: 'border-box' as const }
 
   return (
-    <section id="founders" style={{ padding: '100px 40px', background: '#1F2E23', position: 'relative', overflow: 'hidden' }}>
+    <section id="founders" style={{ padding: isMobile ? '60px 20px' : '100px 40px', background: '#1F2E23', position: 'relative', overflow: 'hidden' }}>
       <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at 50% 0%, rgba(184,155,94,0.08) 0%, transparent 60%)', pointerEvents: 'none' }} />
       <div style={{ maxWidth: '1000px', margin: '0 auto', position: 'relative', zIndex: 1 }}>
         <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
           <div style={{ display: 'inline-block', padding: '6px 18px', border: '1px solid rgba(184,155,94,0.4)', borderRadius: '20px', fontSize: '11px', letterSpacing: '.18em', color: '#B89B5E', textTransform: 'uppercase', marginBottom: '1.5rem' }}>Founders Pricing — Limited Time</div>
-          <h2 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '52px', fontWeight: 300, color: '#F5F3EF', lineHeight: 1.1, margin: '0 0 1rem' }}>Lock in your vault<br/><em style={{ color: '#B89B5E' }}>before we launch.</em></h2>
+          <h2 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: isMobile ? '36px' : '52px', fontWeight: 300, color: '#F5F3EF', lineHeight: 1.1, margin: '0 0 1rem' }}>Lock in your vault<br/><em style={{ color: '#B89B5E' }}>before we launch.</em></h2>
           <p style={{ fontSize: '17px', color: 'rgba(245,243,239,0.5)', lineHeight: 1.8, maxWidth: '560px', margin: '0 auto', fontFamily: 'Cormorant Garamond, serif', fontStyle: 'italic' }}>Sign up today at founders pricing and you are grandfathered in forever — no matter what our prices become after launch.</p>
         </div>
         <div style={{ display: 'flex', justifyContent: 'center', gap: '1.5rem', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
           {[{ value: timeLeft.days, label: 'Days' }, { value: timeLeft.hours, label: 'Hours' }, { value: timeLeft.minutes, label: 'Minutes' }, { value: timeLeft.seconds, label: 'Seconds' }].map(({ value, label }) => (
             <div key={label} style={{ textAlign: 'center', minWidth: '80px' }}>
-              <div style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '56px', fontWeight: 300, color: '#B89B5E', lineHeight: 1, marginBottom: '.25rem' }}>{String(value).padStart(2, '0')}</div>
+              <div style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: isMobile ? '40px' : '56px', fontWeight: 300, color: '#B89B5E', lineHeight: 1, marginBottom: '.25rem' }}>{String(value).padStart(2, '0')}</div>
               <div style={{ fontSize: '10px', letterSpacing: '.2em', color: 'rgba(245,243,239,0.3)', textTransform: 'uppercase' }}>{label}</div>
             </div>
           ))}
@@ -98,7 +105,7 @@ export function FoundersSection() {
         </div>
         <div style={{ marginBottom: '2rem' }}>
           <div style={{ fontSize: '11px', letterSpacing: '.2em', color: 'rgba(245,243,239,0.4)', textTransform: 'uppercase', marginBottom: '1rem', textAlign: 'center' }}>Select your founders tier</div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '10px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(5, 1fr)', gap: '10px' }}>
             {TIERS.map(tier => {
               const avail = availabilityStyle(tier.availability)
               const isSelected = selectedTier === tier.id
@@ -118,7 +125,7 @@ export function FoundersSection() {
         {!submitted ? (
           <div style={{ background: 'rgba(245,243,239,0.04)', border: '1px solid rgba(184,155,94,0.15)', borderRadius: '10px', padding: '2rem' }}>
             <div style={{ fontSize: '13px', fontWeight: 600, color: '#F5F3EF', marginBottom: '1.5rem', textAlign: 'center' }}>No credit card required — lock in your spot now</div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
               <div>
                 <label style={{ fontSize: '10px', letterSpacing: '.12em', textTransform: 'uppercase', color: 'rgba(245,243,239,0.4)', display: 'block', marginBottom: '6px' }}>Full name *</label>
                 <input type="text" placeholder="Your name" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} style={inputStyle} />

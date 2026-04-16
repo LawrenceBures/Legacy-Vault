@@ -3,12 +3,20 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { FoundersSection, CountdownBanner } from '@/lib/FoundersSection'
+import { useEffect, useRef } from 'react'
 
 export default function LandingPage() {
   const router = useRouter()
   const [hoveredFeature, setHoveredFeature] = useState<number | null>(null)
   const [hoveredBtn, setHoveredBtn] = useState<string | null>(null)
   const [openFaq, setOpenFaq] = useState<number | null>(null)
+  const [isMobile, setIsMobile] = useState(false)
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768)
+    check()
+    window.addEventListener('resize', check)
+    return () => window.removeEventListener('resize', check)
+  }, [])
 
   const features = [
     { icon: '🎥', label: 'Video Messages', desc: 'Record personal video messages. Your face, your voice, your presence — preserved forever.', live: true },
@@ -63,8 +71,8 @@ export default function LandingPage() {
 
       <nav style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100, background: 'rgba(31,46,35,0.97)', borderBottom: '1px solid rgba(184,155,94,0.15)', padding: '0 40px', height: '64px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '20px', fontWeight: 600, color: '#B89B5E', letterSpacing: '.05em' }}>Legacy Vault</div>
-        <div style={{ display: 'flex', gap: '28px', alignItems: 'center' }}>
-          {['Features', 'Security', 'Pricing', 'About'].map(item => (
+        <div style={{ display: 'flex', gap: isMobile ? '8px' : '28px', alignItems: 'center' }}>
+          {!isMobile && ['Features', 'Security', 'Pricing', 'About'].map(item => (
             <a key={item} href={item === 'About' ? '/about' : `#${item.toLowerCase()}`} style={{ fontSize: '13px', color: 'rgba(245,243,239,0.5)', textDecoration: 'none' }}
               onMouseEnter={e => (e.currentTarget.style.color = '#B89B5E')}
               onMouseLeave={e => (e.currentTarget.style.color = 'rgba(245,243,239,0.5)')}
@@ -81,8 +89,8 @@ export default function LandingPage() {
         <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at 50% 40%, rgba(184,155,94,0.1) 0%, transparent 65%)', pointerEvents: 'none' }} />
         <div style={{ maxWidth: '780px', position: 'relative', zIndex: 1 }}>
           <div style={{ display: 'inline-block', padding: '6px 18px', border: '1px solid rgba(184,155,94,0.3)', borderRadius: '20px', fontSize: '11px', letterSpacing: '.18em', color: 'rgba(184,155,94,0.8)', textTransform: 'uppercase', marginBottom: '2rem' }}>Your Voice. Your Legacy.</div>
-          <h1 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '68px', fontWeight: 300, color: '#F5F3EF', lineHeight: 1.1, margin: '0 0 1.5rem' }}>The people you love<br/>deserve to hear it<br/><em style={{ color: '#B89B5E' }}>from you.</em></h1>
-          <p style={{ fontSize: '18px', color: 'rgba(245,243,239,0.5)', lineHeight: 1.8, margin: '0 auto 3rem', fontFamily: 'Cormorant Garamond, serif', fontStyle: 'italic', maxWidth: '560px' }}>Record video messages. Write letters. Leave voice recordings.<br/>Delivered to the people who matter most — exactly when it matters.</p>
+          <h1 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: isMobile ? '38px' : '68px', fontWeight: 300, color: '#F5F3EF', lineHeight: 1.1, margin: '0 0 1.5rem' }}>The people you love<br/>deserve to hear it<br/><em style={{ color: '#B89B5E' }}>from you.</em></h1>
+          <p style={{ fontSize: isMobile ? '15px' : '18px', color: 'rgba(245,243,239,0.5)', lineHeight: 1.8, margin: '0 auto 3rem', fontFamily: 'Cormorant Garamond, serif', fontStyle: 'italic', maxWidth: '560px' }}>Record video messages. Write letters. Leave voice recordings.<br/>Delivered to the people who matter most — exactly when it matters.</p>
           <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap', marginBottom: '2rem' }}>
             <a href="#founders" style={{ padding: '16px 44px', background: '#B89B5E', color: '#1F2E23', border: 'none', borderRadius: '4px', fontSize: '13px', letterSpacing: '.15em', textTransform: 'uppercase', cursor: 'pointer', fontWeight: 700, textDecoration: 'none', display: 'inline-block' }}>Lock in founders price</a>
             <button style={{ padding: '16px 36px', background: 'transparent', color: 'rgba(245,243,239,0.6)', border: '1px solid rgba(245,243,239,0.2)', borderRadius: '4px', fontSize: '13px', letterSpacing: '.1em', textTransform: 'uppercase', cursor: 'pointer' }}>▶ Watch demo</button>
@@ -98,13 +106,13 @@ export default function LandingPage() {
 
       <FoundersSection />
 
-      <section style={{ padding: '100px 40px', background: '#F5F3EF' }}>
+      <section style={{ padding: isMobile ? '60px 20px' : '100px 40px', background: '#F5F3EF' }}>
         <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
           <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
             <div style={{ fontSize: '11px', letterSpacing: '.2em', color: '#B89B5E', textTransform: 'uppercase', marginBottom: '1rem' }}>Simple by design</div>
             <h2 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '46px', fontWeight: 300, color: '#1F2E23', margin: '0 0 1rem' }}>Three steps.<br/>A lifetime of impact.</h2>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '2rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)', gap: '1.5rem' }}>
             {steps.map((step, i) => (
               <div key={i} style={{ background: '#fff', border: '1px solid rgba(31,46,35,0.08)', borderRadius: '10px', padding: '2rem' }}>
                 <div style={{ fontSize: '11px', letterSpacing: '.2em', color: '#B89B5E', marginBottom: '1.5rem' }}>{step.num}</div>
@@ -118,7 +126,7 @@ export default function LandingPage() {
       </section>
 
       <section style={{ padding: '100px 40px', background: '#F5F3EF', borderTop: '1px solid rgba(31,46,35,0.06)' }}>
-        <div style={{ maxWidth: '1000px', margin: '0 auto', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4rem', alignItems: 'center' }}>
+        <div style={{ maxWidth: '1000px', margin: '0 auto', display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: isMobile ? '2rem' : '4rem', alignItems: 'center' }}>
           <div style={{ background: '#fff', border: '1px solid rgba(31,46,35,0.08)', borderRadius: '10px', padding: '2rem' }}>
             <div style={{ fontSize: '11px', letterSpacing: '.2em', color: '#B89B5E', textTransform: 'uppercase', marginBottom: '1.5rem' }}>Milestone Delivery</div>
             {[{ icon: '🎂', label: 'When my daughter turns 18', date: 'June 14, 2031' }, { icon: '💍', label: 'On our 25th anniversary', date: 'September 3, 2028' }, { icon: '🎓', label: 'When my son graduates', date: 'May 2029' }, { icon: '👶', label: 'When our first grandchild is born', date: 'Upon birth' }].map((item, i) => (
@@ -141,8 +149,8 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <section style={{ padding: '100px 40px', background: '#1F2E23' }}>
-        <div style={{ maxWidth: '1000px', margin: '0 auto', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4rem', alignItems: 'center' }}>
+      <section style={{ padding: isMobile ? '60px 20px' : '100px 40px', background: '#1F2E23' }}>
+        <div style={{ maxWidth: '1000px', margin: '0 auto', display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: isMobile ? '2rem' : '4rem', alignItems: 'center' }}>
           <div>
             <div style={{ fontSize: '11px', letterSpacing: '.2em', color: '#B89B5E', textTransform: 'uppercase', marginBottom: '1rem' }}>Powered by AI</div>
             <h2 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '42px', fontWeight: 300, color: '#F5F3EF', lineHeight: 1.2, margin: '0 0 1.5rem' }}>We help you say<br/>what you really mean.</h2>
@@ -175,13 +183,13 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <section id="features" style={{ padding: '100px 40px', background: '#F5F3EF' }}>
+      <section id="features" style={{ padding: isMobile ? '60px 20px' : '100px 40px', background: '#F5F3EF' }}>
         <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
           <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
             <div style={{ fontSize: '11px', letterSpacing: '.2em', color: '#B89B5E', textTransform: 'uppercase', marginBottom: '1rem' }}>Everything you need</div>
             <h2 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '46px', fontWeight: 300, color: '#1F2E23', margin: '0 0 1rem' }}>Built for the moments<br/>that matter most.</h2>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1.5rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)', gap: '1.5rem' }}>
             {features.map((feature, i) => (
               <div key={i} onMouseEnter={() => setHoveredFeature(i)} onMouseLeave={() => setHoveredFeature(null)}
                 style={{ background: '#fff', border: `1px solid ${hoveredFeature === i ? 'rgba(184,155,94,0.4)' : 'rgba(31,46,35,0.08)'}`, borderRadius: '10px', padding: '1.5rem', transition: 'all 0.2s ease', transform: hoveredFeature === i ? 'translateY(-3px)' : 'none', position: 'relative' }}>
@@ -195,13 +203,13 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <section id="security" style={{ padding: '100px 40px', background: '#1F2E23' }}>
+      <section id="security" style={{ padding: isMobile ? '60px 20px' : '100px 40px', background: '#1F2E23' }}>
         <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
           <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
             <div style={{ fontSize: '11px', letterSpacing: '.2em', color: '#B89B5E', textTransform: 'uppercase', marginBottom: '1rem' }}>Your privacy is everything</div>
             <h2 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '46px', fontWeight: 300, color: '#F5F3EF', margin: '0 0 1rem' }}>Built like a vault.<br/><em style={{ color: '#B89B5E' }}>Because it is one.</em></h2>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1.5rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)', gap: '1.5rem' }}>
             {trustPoints.map((point, i) => (
               <div key={i} style={{ background: 'rgba(245,243,239,0.04)', border: '1px solid rgba(184,155,94,0.12)', borderRadius: '10px', padding: '1.5rem' }}>
                 <div style={{ fontSize: '28px', marginBottom: '1rem' }}>{point.icon}</div>
@@ -213,12 +221,12 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <section id="pricing" style={{ padding: '100px 40px', background: '#F5F3EF' }}>
+      <section id="pricing" style={{ padding: isMobile ? '60px 20px' : '100px 40px', background: '#F5F3EF' }}>
         <div style={{ maxWidth: '1300px', margin: '0 auto', textAlign: 'center' }}>
           <div style={{ fontSize: '11px', letterSpacing: '.2em', color: '#B89B5E', textTransform: 'uppercase', marginBottom: '1rem' }}>Founders Pricing</div>
           <h2 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '46px', fontWeight: 300, color: '#1F2E23', margin: '0 0 1rem' }}>Lock in your price today.<br/>Keep it forever.</h2>
           <p style={{ fontSize: '14px', color: 'rgba(31,46,35,0.5)', marginBottom: '3rem' }}>Grandfathered pricing for everyone who signs up before May 15, 2026. No credit card required.</p>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '1rem', alignItems: 'start' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(5, 1fr)', gap: '1rem', alignItems: 'start' }}>
             {plans.map((plan, i) => (
               <div key={i} style={{ background: plan.dark ? '#1F2E23' : '#fff', border: plan.popular ? '2px solid #B89B5E' : `1px solid ${plan.dark ? 'rgba(184,155,94,0.2)' : 'rgba(31,46,35,0.1)'}`, borderRadius: '10px', padding: '1.5rem', textAlign: 'left', position: 'relative' }}>
                 {plan.popular && <div style={{ position: 'absolute', top: '-12px', left: '50%', transform: 'translateX(-50%)', background: '#B89B5E', color: '#1F2E23', fontSize: '9px', letterSpacing: '.12em', textTransform: 'uppercase', padding: '4px 12px', borderRadius: '20px', fontWeight: 700, whiteSpace: 'nowrap' }}>Most popular</div>}
@@ -262,7 +270,7 @@ export default function LandingPage() {
       <section style={{ padding: '120px 40px', background: '#1F2E23', textAlign: 'center' }}>
         <div style={{ maxWidth: '640px', margin: '0 auto' }}>
           <div style={{ fontSize: '48px', marginBottom: '1.5rem' }}>🔒</div>
-          <h2 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '52px', fontWeight: 300, color: '#F5F3EF', lineHeight: 1.2, margin: '0 0 1.5rem' }}>Do not leave the most<br/>important things<br/><em style={{ color: '#B89B5E' }}>unsaid.</em></h2>
+          <h2 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: isMobile ? '36px' : '52px', fontWeight: 300, color: '#F5F3EF', lineHeight: 1.2, margin: '0 0 1.5rem' }}>Do not leave the most<br/>important things<br/><em style={{ color: '#B89B5E' }}>unsaid.</em></h2>
           <p style={{ fontSize: '17px', color: 'rgba(245,243,239,0.45)', lineHeight: 1.8, margin: '0 0 3rem', fontFamily: 'Cormorant Garamond, serif', fontStyle: 'italic' }}>Your vault takes 3 minutes to set up.<br/>What it preserves lasts a lifetime.</p>
           <a href="#founders" style={{ display: 'inline-block', padding: '18px 52px', background: '#B89B5E', color: '#1F2E23', border: 'none', borderRadius: '4px', fontSize: '14px', letterSpacing: '.18em', textTransform: 'uppercase', cursor: 'pointer', fontWeight: 700, textDecoration: 'none' }}>Lock in your price</a>
           <div style={{ marginTop: '1.5rem', fontSize: '12px', color: 'rgba(245,243,239,0.2)', letterSpacing: '.06em' }}>No credit card · Grandfathered pricing forever</div>
