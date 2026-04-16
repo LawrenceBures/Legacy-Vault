@@ -29,6 +29,24 @@ export async function POST(req: NextRequest) {
       console.error('Email send failed:', emailErr)
     }
 
+    // Send confirmation SMS if phone provided
+    if (phone) {
+      try {
+        await fetch(`${process.env.NEXT_PUBLIC_SITE_URL || 'https://joinlegacyvault.com'}/api/sms`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            type: 'waitlist_confirmation',
+            to: phone,
+            name,
+            tier,
+          }),
+        })
+      } catch (smsErr) {
+        console.error('SMS send failed:', smsErr)
+      }
+    }
+
     return NextResponse.json({ success: true })
   } catch (err) {
     console.error('Waitlist error:', err)
