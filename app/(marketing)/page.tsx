@@ -64,8 +64,8 @@ export default function LandingPage() {
       <nav style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100, background: 'rgba(31,46,35,0.97)', borderBottom: '1px solid rgba(184,155,94,0.15)', padding: '0 40px', height: '64px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '20px', fontWeight: 600, color: '#B89B5E', letterSpacing: '.05em' }}>Legacy Vault</div>
         <div style={{ display: 'flex', gap: '28px', alignItems: 'center' }}>
-          {['Features', 'Security', 'Pricing'].map(item => (
-            <a key={item} href={`#${item.toLowerCase()}`} style={{ fontSize: '13px', color: 'rgba(245,243,239,0.5)', textDecoration: 'none' }}
+          {['Features', 'Security', 'Pricing', 'About'].map(item => (
+            <a key={item} href={item === 'About' ? '/about' : `#${item.toLowerCase()}`} style={{ fontSize: '13px', color: 'rgba(245,243,239,0.5)', textDecoration: 'none' }}
               onMouseEnter={e => (e.currentTarget.style.color = '#B89B5E')}
               onMouseLeave={e => (e.currentTarget.style.color = 'rgba(245,243,239,0.5)')}
             >{item}</a>
