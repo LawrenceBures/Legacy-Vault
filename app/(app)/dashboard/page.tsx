@@ -48,6 +48,13 @@ export default function Dashboard() {
   const fetchStats = useCallback(async () => {
     if (!user) return
     try {
+      // Auto check-in when user visits dashboard
+      fetch('/api/checkin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ clerk_id: user.id }),
+      }).catch(console.error)
+
       const params = new URLSearchParams({
         clerk_id: user.id,
         email: user.emailAddresses[0].emailAddress,
