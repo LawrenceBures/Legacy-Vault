@@ -1,6 +1,5 @@
 'use client'
 
-
 import { useUser, UserButton, useAuth } from '@clerk/nextjs'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState, useCallback } from 'react'
@@ -27,6 +26,14 @@ export default function VaultPage() {
   const [entries, setEntries] = useState<Entry[]>([])
   const [loading, setLoading] = useState(true)
   const [activeFilter, setActiveFilter] = useState('All')
+  const [isMobile, setIsMobile] = useState(false)
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768)
+    check()
+    window.addEventListener('resize', check)
+    return () => window.removeEventListener('resize', check)
+  }, [])
 
   useEffect(() => {
     if (isLoaded && !user) router.push('/sign-in')
@@ -90,20 +97,21 @@ export default function VaultPage() {
     ? entries
     : entries.filter(e => e.format === activeFilter.toLowerCase())
 
-  const formatDate = (dateStr: string) => {
-    return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-  }
+  const formatDate = (dateStr: string) =>
+    new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: '#F5F3EF' }}>
 
-      {/* SIDEBAR */}
+      {/* SIDEBAR — desktop only */}
       <aside
         onMouseEnter={() => setSidebarOpen(true)}
         onMouseLeave={() => setSidebarOpen(false)}
         style={{
+          display: isMobile ? 'none' : 'flex',
+          flexDirection: 'column',
           width: sidebarOpen ? '200px' : '64px',
-          background: '#1F2E23', display: 'flex', flexDirection: 'column',
+          background: '#1F2E23',
           alignItems: sidebarOpen ? 'flex-start' : 'center',
           padding: '20px 0', gap: '6px',
           borderRight: '1px solid rgba(184,155,94,0.1)',
@@ -121,7 +129,7 @@ export default function VaultPage() {
           paddingRight: sidebarOpen ? '20px' : '0',
           transition: 'all 0.25s ease', whiteSpace: 'nowrap',
         }}>
-          {sidebarOpen ? 'Legacy Vault' : 'L\nV'}
+          {sidebarOpen ? 'Legacy Vault' : 'LV'}
         </div>
 
         {navItems.map((item, i) => (
@@ -152,48 +160,60 @@ export default function VaultPage() {
           display: 'flex', justifyContent: sidebarOpen ? 'flex-start' : 'center',
           transition: 'all 0.25s ease',
         }}>
-          <UserButton  />
+          <UserButton />
         </div>
       </aside>
 
       {/* MAIN */}
-      <main style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
+      <main style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', paddingBottom: isMobile ? '70px' : '0' }}>
 
         {/* HEADER */}
-        <div style={{ padding: '28px 28px 24px', background: '#F5F3EF', borderBottom: '1px solid rgba(31,46,35,0.08)', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
+        <div style={{
+          padding: isMobile ? '20px 16px 16px' : '28px 28px 24px',
+          background: '#F5F3EF', borderBottom: '1px solid rgba(31,46,35,0.08)',
+          display: 'flex', alignItems: isMobile ? 'flex-start' : 'flex-start',
+          justifyContent: 'space-between', gap: '12px',
+        }}>
           <div>
             <div style={{ fontSize: '9px', letterSpacing: '.25em', textTransform: 'uppercase', color: '#B89B5E', marginBottom: '8px' }}>My Vault</div>
-            <div style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '36px', fontWeight: 300, color: '#1F2E23', lineHeight: 1.1, marginBottom: '6px' }}>
+            <div style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: isMobile ? '28px' : '36px', fontWeight: 300, color: '#1F2E23', lineHeight: 1.1, marginBottom: '6px' }}>
               Your <em style={{ color: '#B89B5E', fontStyle: 'italic' }}>Legacy Entries.</em>
             </div>
-            <div style={{ fontSize: '13px', color: 'rgba(31,46,35,0.45)', fontFamily: 'Cormorant Garamond, serif', fontStyle: 'italic' }}>
-              Everything you leave behind, kept safe until the moment it matters.
-            </div>
+            {!isMobile && (
+              <div style={{ fontSize: '13px', color: 'rgba(31,46,35,0.45)', fontFamily: 'Cormorant Garamond, serif', fontStyle: 'italic' }}>
+                Everything you leave behind, kept safe until the moment it matters.
+              </div>
+            )}
           </div>
           <a href="/new-entry"
             onMouseEnter={() => setHoveredCTA(true)}
             onMouseLeave={() => setHoveredCTA(false)}
             style={{
-              display: 'flex', alignItems: 'center', gap: '8px',
-              padding: '10px 20px',
+              display: 'flex', alignItems: 'center', gap: '6px',
+              padding: isMobile ? '8px 14px' : '10px 20px',
               background: hoveredCTA ? '#B89B5E' : '#1F2E23',
               color: hoveredCTA ? '#1F2E23' : '#B89B5E',
               border: '1px solid #B89B5E', borderRadius: '4px',
               fontSize: '11px', letterSpacing: '.12em', textTransform: 'uppercase',
               textDecoration: 'none', transition: 'all 0.22s ease',
-              flexShrink: 0, marginTop: '6px', fontWeight: 500,
+              flexShrink: 0, marginTop: '6px', fontWeight: 500, whiteSpace: 'nowrap',
             }}
           >
-            <span style={{ fontSize: '14px' }}>+</span> New Entry
+            <span>+</span> {isMobile ? 'New' : 'New Entry'}
           </a>
         </div>
 
         {/* FILTER BAR */}
-        <div style={{ padding: '12px 28px', background: '#fff', borderBottom: '1px solid rgba(31,46,35,0.08)', display: 'flex', gap: '8px', alignItems: 'center' }}>
+        <div style={{
+          padding: isMobile ? '10px 16px' : '12px 28px',
+          background: '#fff', borderBottom: '1px solid rgba(31,46,35,0.08)',
+          display: 'flex', gap: '8px', alignItems: 'center',
+          overflowX: 'auto', scrollbarWidth: 'none',
+        }}>
           {['All', 'Video', 'Audio', 'Text'].map((filter) => (
             <button key={filter} onClick={() => setActiveFilter(filter)}
               style={{
-                padding: '5px 14px', borderRadius: '20px',
+                padding: '5px 14px', borderRadius: '20px', flexShrink: 0,
                 border: `1px solid ${activeFilter === filter ? '#1F2E23' : 'rgba(31,46,35,0.15)'}`,
                 background: activeFilter === filter ? '#1F2E23' : 'transparent',
                 color: activeFilter === filter ? '#F5F3EF' : 'rgba(31,46,35,0.5)',
@@ -204,7 +224,7 @@ export default function VaultPage() {
               {filter}
             </button>
           ))}
-          <div style={{ marginLeft: 'auto', fontSize: '10px', color: 'rgba(31,46,35,0.3)', letterSpacing: '.08em' }}>
+          <div style={{ marginLeft: 'auto', fontSize: '10px', color: 'rgba(31,46,35,0.3)', letterSpacing: '.08em', flexShrink: 0 }}>
             {loading ? '...' : `${filteredEntries.length} ${filteredEntries.length === 1 ? 'ENTRY' : 'ENTRIES'}`}
           </div>
         </div>
@@ -215,7 +235,12 @@ export default function VaultPage() {
             Loading your vault...
           </div>
         ) : filteredEntries.length > 0 ? (
-          <div style={{ padding: '24px 28px', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(280px, 100%), 1fr))', gap: '16px' }}>
+          <div style={{
+            padding: isMobile ? '16px' : '24px 28px',
+            display: 'grid',
+            gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fill, minmax(280px, 1fr))',
+            gap: '12px',
+          }}>
             {filteredEntries.map((entry) => (
               <div key={entry.id}
                 onMouseEnter={() => setHoveredCard(entry.id)}
@@ -230,7 +255,6 @@ export default function VaultPage() {
                   boxShadow: hoveredCard === entry.id ? '0 4px 16px rgba(31,46,35,0.08)' : 'none',
                 }}
               >
-                {/* Entry header */}
                 <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', marginBottom: '12px' }}>
                   <div style={{
                     width: '40px', height: '40px', borderRadius: '8px', flexShrink: 0,
@@ -250,13 +274,13 @@ export default function VaultPage() {
                   <div style={{
                     fontSize: '9px', padding: '3px 8px', borderRadius: '20px',
                     background: 'rgba(46,204,113,0.08)', color: '#27ae60',
-                    border: '1px solid rgba(46,204,113,0.2)', letterSpacing: '.08em', textTransform: 'uppercase', flexShrink: 0,
+                    border: '1px solid rgba(46,204,113,0.2)', letterSpacing: '.08em',
+                    textTransform: 'uppercase', flexShrink: 0,
                   }}>
                     {entry.status}
                   </div>
                 </div>
 
-                {/* Preview */}
                 {entry.message_content && (
                   <div style={{
                     fontSize: '12px', color: 'rgba(31,46,35,0.5)', lineHeight: 1.6,
@@ -269,7 +293,6 @@ export default function VaultPage() {
                   </div>
                 )}
 
-                {/* Footer */}
                 <div style={{ marginTop: '14px', paddingTop: '12px', borderTop: '1px solid rgba(31,46,35,0.06)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <div style={{ fontSize: '10px', color: 'rgba(31,46,35,0.3)' }}>No recipients assigned</div>
                   <div style={{ fontSize: '11px', color: '#B89B5E' }}>Edit →</div>
@@ -278,8 +301,7 @@ export default function VaultPage() {
             ))}
           </div>
         ) : (
-          /* EMPTY STATE */
-          <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '60px 28px' }}>
+          <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '60px 16px' }}>
             <div style={{ textAlign: 'center', maxWidth: '420px' }}>
               <div style={{
                 width: '72px', height: '72px', margin: '0 auto 24px',
@@ -300,18 +322,44 @@ export default function VaultPage() {
                   padding: '14px 32px', background: '#1F2E23', color: '#B89B5E',
                   border: '1px solid rgba(184,155,94,0.3)', borderRadius: '4px',
                   fontSize: '11px', letterSpacing: '.15em', textTransform: 'uppercase',
-                  textDecoration: 'none', fontWeight: 500, transition: 'all 0.22s ease', marginBottom: '16px',
+                  textDecoration: 'none', fontWeight: 500, transition: 'all 0.22s ease',
                 }}
                 onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = '#B89B5E'; (e.currentTarget as HTMLElement).style.color = '#1F2E23' }}
                 onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = '#1F2E23'; (e.currentTarget as HTMLElement).style.color = '#B89B5E' }}
               >
                 <span style={{ fontSize: '16px' }}>+</span> Create Your First Entry
               </a>
-              <div style={{ fontSize: '11px', color: 'rgba(31,46,35,0.3)', letterSpacing: '.06em' }}>Video · Audio · Text</div>
             </div>
           </div>
         )}
       </main>
+
+      {/* MOBILE BOTTOM NAV */}
+      {isMobile && (
+        <div style={{
+          position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 100,
+          background: '#1F2E23', borderTop: '1px solid rgba(184,155,94,0.15)',
+          display: 'flex', alignItems: 'center', justifyContent: 'space-around',
+          padding: '8px 0', height: '60px',
+        }}>
+          {[
+            { icon: '⊞', label: 'Dashboard', href: '/dashboard' },
+            { icon: '🔒', label: 'Vault', href: '/vault' },
+            { icon: '+', label: 'New', href: '/new-entry' },
+            { icon: '👥', label: 'People', href: '/my-people' },
+            { icon: '⏱', label: 'Delivery', href: '/delivery' },
+          ].map(item => (
+            <a key={item.href} href={item.href} style={{
+              display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px',
+              textDecoration: 'none', flex: 1,
+            }}>
+              <div style={{ fontSize: item.icon === '+' ? '22px' : '16px', color: item.href === '/vault' ? '#B89B5E' : 'rgba(245,243,239,0.5)' }}>{item.icon}</div>
+              <div style={{ fontSize: '9px', color: item.href === '/vault' ? '#B89B5E' : 'rgba(245,243,239,0.4)', letterSpacing: '.04em' }}>{item.label}</div>
+            </a>
+          ))}
+        </div>
+      )}
+
     </div>
   )
 }

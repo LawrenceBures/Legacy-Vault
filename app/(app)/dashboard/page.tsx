@@ -3,7 +3,6 @@
 import { useUser, UserButton, useAuth } from '@clerk/nextjs'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState, useCallback } from 'react'
-import { createSupabaseClient } from '@/lib/supabase-auth'
 
 type Stats = {
   vaultEntries: number
@@ -21,12 +20,6 @@ export default function Dashboard() {
   const [hoveredAction, setHoveredAction] = useState<number | null>(null)
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
-  useEffect(() => {
-    const check = () => setIsMobile(window.innerWidth < 768)
-    check()
-    window.addEventListener('resize', check)
-    return () => window.removeEventListener('resize', check)
-  }, [])
   const [hoveredNav, setHoveredNav] = useState<number | null>(null)
   const [stats, setStats] = useState<Stats>({
     vaultEntries: 0, recipients: 0, delivered: 0,
@@ -35,13 +28,19 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768)
+    check()
+    window.addEventListener('resize', check)
+    return () => window.removeEventListener('resize', check)
+  }, [])
+
+  useEffect(() => {
     if (isLoaded && !user) router.push('/sign-in')
   }, [isLoaded, user, router])
 
   const fetchStats = useCallback(async () => {
     if (!user) return
     try {
-      // Auto check-in when user visits dashboard
       fetch('/api/checkin', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -96,7 +95,7 @@ export default function Dashboard() {
 
   if (!isLoaded || !user) return null
 
-  const firstName = stats.fullName ? stats.fullName.split(' ')[0] : user.firstName ? user.firstName : 'Lawrence'
+  const firstName = stats.fullName ? stats.fullName.split(' ')[0] : user.firstName ? user.firstName : 'there'
 
   const progressSteps = [stats.vaultEntries > 0, stats.recipients > 0, stats.deliveryConfigured]
   const progressPct = Math.round((progressSteps.filter(Boolean).length / progressSteps.length) * 100)
@@ -107,7 +106,7 @@ export default function Dashboard() {
     { num: stats.deliveryConfigured ? '✓' : '—', label: 'Delivery Trigger', href: '/delivery' },
     { num: '✓', label: 'Vault Status', href: '/dashboard', green: true },
     { num: loading ? '...' : String(stats.delivered), label: 'Delivered', href: '/delivery' },
-    { num: (() => { const p = stats.plan; if (!p || p === 'pro' || p === '') return '—'; const names: Record<string, string> = { starter_founder: 'Starter Founder', basic_founder: 'Basic Founder', legacy_founder: 'Legacy Founder', family_founder: 'Family Founder', estate_founder: 'Estate Founder', starter: 'Starter', basic: 'Basic', legacy: 'Legacy', family: 'Family', estate: 'Estate' }; return names[p] || p; })(), label: 'PLAN', href: '/account' },
+    { num: (() => { const p = stats.plan; if (!p || p === 'pro' || p === '') return '—'; const names: Record<string, string> = { starter_founder: 'Starter', basic_founder: 'Basic', legacy_founder: 'Legacy', family_founder: 'Family', estate_founder: 'Estate', starter: 'Starter', basic: 'Basic', legacy: 'Legacy', family: 'Family', estate: 'Estate' }; return names[p] || p; })(), label: 'PLAN', href: '/account' },
   ]
 
   const actions = [
@@ -135,12 +134,15 @@ export default function Dashboard() {
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: '#F5F3EF' }}>
 
-      {/* SIDEBAR */}
+      {/* SIDEBAR — desktop only */}
       <aside
         onMouseEnter={() => setSidebarOpen(true)}
         onMouseLeave={() => setSidebarOpen(false)}
         style={{
-          display: isMobile ? 'none' : 'flex', flexDirection: 'column', width: sidebarOpen ? '200px' : '64px', background: '#1F2E23',
+          display: isMobile ? 'none' : 'flex',
+          flexDirection: 'column',
+          width: sidebarOpen ? '200px' : '64px',
+          background: '#1F2E23',
           alignItems: sidebarOpen ? 'flex-start' : 'center',
           padding: '20px 0', gap: '6px',
           borderRight: '1px solid rgba(184,155,94,0.1)',
@@ -158,7 +160,7 @@ export default function Dashboard() {
           paddingRight: sidebarOpen ? '20px' : '0',
           transition: 'all 0.25s ease', whiteSpace: 'nowrap',
         }}>
-          {sidebarOpen ? 'Legacy Vault' : 'L\nV'}
+          {sidebarOpen ? 'Legacy Vault' : 'LV'}
         </div>
 
         {navItems.map((item, i) => (
@@ -192,19 +194,19 @@ export default function Dashboard() {
           display: 'flex', justifyContent: sidebarOpen ? 'flex-start' : 'center',
           transition: 'all 0.25s ease',
         }}>
-          <UserButton  />
+          <UserButton />
         </div>
       </aside>
 
       {/* MAIN */}
-      <main style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
+      <main style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', paddingBottom: isMobile ? '70px' : '0' }}>
 
         {/* HEADER */}
-        <div style={{ padding: '28px 28px 24px', background: '#F5F3EF', borderBottom: '1px solid rgba(31,46,35,0.08)' }}>
+        <div style={{ padding: isMobile ? '20px 16px 16px' : '28px 28px 24px', background: '#F5F3EF', borderBottom: '1px solid rgba(31,46,35,0.08)' }}>
           <div style={{ fontSize: '9px', letterSpacing: '.25em', textTransform: 'uppercase', color: '#B89B5E', marginBottom: '8px' }}>
-            Dashboard · {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
+            Dashboard · {new Date().toLocaleDateString('en-US', { weekday: isMobile ? 'short' : 'long', month: 'long', day: 'numeric', year: 'numeric' })}
           </div>
-          <div style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '36px', fontWeight: 300, color: '#1F2E23', lineHeight: 1.1, marginBottom: '6px' }}>
+          <div style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: isMobile ? '28px' : '36px', fontWeight: 300, color: '#1F2E23', lineHeight: 1.1, marginBottom: '6px' }}>
             Welcome back, <em style={{ color: '#B89B5E', fontStyle: 'italic' }}>{firstName}.</em>
           </div>
           <div style={{ fontSize: '13px', color: 'rgba(31,46,35,0.45)', fontFamily: 'Cormorant Garamond, serif', fontStyle: 'italic' }}>
@@ -213,19 +215,23 @@ export default function Dashboard() {
         </div>
 
         {/* STAT STRIP */}
-        <div style={{ display: 'flex', overflowX: 'auto', background: '#fff', borderBottom: '1px solid rgba(31,46,35,0.08)', scrollbarWidth: 'none' }}>
+        <div style={{ display: 'flex', overflowX: 'auto', background: '#fff', borderBottom: '1px solid rgba(31,46,35,0.08)', scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}>
           {statItems.map((stat, i) => (
             <a key={i} href={stat.href}
               onMouseEnter={() => setHoveredStat(i)} onMouseLeave={() => setHoveredStat(null)}
               style={{
-                flex: '0 0 auto', padding: '18px 28px',
-                borderRight: '1px solid rgba(31,46,35,0.07)', minWidth: '130px',
+                flex: '0 0 auto',
+                padding: isMobile ? '14px 18px' : '18px 28px',
+                borderRight: '1px solid rgba(31,46,35,0.07)',
+                minWidth: isMobile ? '100px' : '130px',
                 cursor: 'pointer', textDecoration: 'none', display: 'block',
                 background: hoveredStat === i ? '#1F2E23' : '#fff',
-                transition: 'all .22s ease', position: 'relative',
+                transition: 'all .22s ease',
               }}>
               <div style={{
-                fontFamily: 'Cormorant Garamond, serif', fontSize: '34px', fontWeight: 300,
+                fontFamily: 'Cormorant Garamond, serif',
+                fontSize: isMobile ? '26px' : '34px',
+                fontWeight: 300,
                 color: hoveredStat === i ? '#B89B5E' : stat.gold ? '#B89B5E' : stat.green ? '#2ecc71' : '#1F2E23',
                 lineHeight: 1, marginBottom: '3px', transition: 'color .22s',
               }}>
@@ -238,36 +244,55 @@ export default function Dashboard() {
               }}>
                 {stat.label}
               </div>
-              {hoveredStat === i && (
-                <div style={{ position: 'absolute', bottom: '10px', right: '12px', fontSize: '11px', color: 'rgba(184,155,94,0.5)' }}>→</div>
-              )}
             </a>
           ))}
         </div>
 
-        {/* BODY */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', flex: 1 }}>
+        {/* BODY — stack on mobile, grid on desktop */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr',
+          flex: 1,
+        }}>
 
           {/* ACTIONS */}
-          <div style={{ padding: '20px', borderRight: '1px solid rgba(31,46,35,0.08)' }}>
+          <div style={{ padding: isMobile ? '16px' : '20px', borderRight: isMobile ? 'none' : '1px solid rgba(31,46,35,0.08)', borderBottom: isMobile ? '1px solid rgba(31,46,35,0.08)' : 'none' }}>
             <div style={{ fontSize: '9px', letterSpacing: '.22em', textTransform: 'uppercase', color: 'rgba(31,46,35,0.35)', marginBottom: '12px', paddingBottom: '10px', borderBottom: '1px solid rgba(31,46,35,0.07)' }}>
-              {(!stats.plan || stats.plan === "" || stats.plan === "pro") && (
-                <div style={{ background: "#1F2E23", border: "1px solid rgba(184,155,94,0.2)", borderRadius: "10px", padding: "1.5rem", marginBottom: "1.5rem" }}>
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "1rem" }}>
-                    <div>
-                      <div style={{ fontFamily: "Cormorant Garamond, serif", fontSize: "20px", fontWeight: 300, color: "#F5F3EF", marginBottom: "4px" }}>Lock in your founders price</div>
-                      <div style={{ fontSize: "13px", color: "rgba(245,243,239,0.45)" }}>Grandfathered pricing forever · Launches May 15, 2026</div>
-                    </div>
-                    <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
-                      {[{tier:"starter_founder",label:"Starter",price:"$1.99"},{tier:"basic_founder",label:"Basic",price:"$4.99"},{tier:"legacy_founder",label:"Legacy",price:"$9.99"},{tier:"family_founder",label:"Family",price:"$19.99"},{tier:"estate_founder",label:"Estate",price:"$49.99"}].map(plan => (
-                        <button key={plan.tier} onClick={() => handleUpgrade(plan.tier)} style={{ padding: "8px 14px", background: plan.tier === "legacy_founder" ? "#B89B5E" : "transparent", color: plan.tier === "legacy_founder" ? "#1F2E23" : "#B89B5E", border: "1px solid rgba(184,155,94,0.3)", borderRadius: "4px", fontSize: "11px", cursor: "pointer", fontWeight: plan.tier === "legacy_founder" ? 700 : 500 }}>{plan.label} {plan.price}</button>
-                      ))}
-                    </div>
+
+              {(!stats.plan || stats.plan === '' || stats.plan === 'pro') && (
+                <div style={{ background: '#1F2E23', border: '1px solid rgba(184,155,94,0.2)', borderRadius: '10px', padding: isMobile ? '1rem' : '1.5rem', marginBottom: '1.5rem' }}>
+                  <div style={{ marginBottom: '1rem' }}>
+                    <div style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: isMobile ? '17px' : '20px', fontWeight: 300, color: '#F5F3EF', marginBottom: '4px' }}>Lock in your founders price</div>
+                    <div style={{ fontSize: '13px', color: 'rgba(245,243,239,0.45)' }}>Grandfathered pricing forever · Launches May 15, 2026</div>
+                  </div>
+                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                    {[
+                      { tier: 'starter_founder', label: 'Starter', price: '$1.99' },
+                      { tier: 'basic_founder', label: 'Basic', price: '$4.99' },
+                      { tier: 'legacy_founder', label: 'Legacy', price: '$9.99' },
+                      { tier: 'family_founder', label: 'Family', price: '$19.99' },
+                      { tier: 'estate_founder', label: 'Estate', price: '$49.99' },
+                    ].map(plan => (
+                      <button key={plan.tier} onClick={() => handleUpgrade(plan.tier)}
+                        style={{
+                          padding: '8px 14px',
+                          background: plan.tier === 'legacy_founder' ? '#B89B5E' : 'transparent',
+                          color: plan.tier === 'legacy_founder' ? '#1F2E23' : '#B89B5E',
+                          border: '1px solid rgba(184,155,94,0.3)',
+                          borderRadius: '4px', fontSize: '11px', cursor: 'pointer',
+                          fontWeight: plan.tier === 'legacy_founder' ? 700 : 500,
+                        }}
+                      >
+                        {plan.label} {plan.price}
+                      </button>
+                    ))}
                   </div>
                 </div>
               )}
+
               Quick Actions
             </div>
+
             {actions.map((action, i) => (
               <a key={i} href={action.href}
                 onMouseEnter={() => setHoveredAction(i)} onMouseLeave={() => setHoveredAction(null)}
@@ -280,11 +305,11 @@ export default function Dashboard() {
                   transform: hoveredAction === i ? 'translateX(3px)' : 'translateX(0)',
                 }}>
                 <div style={{
-                  width: '32px', height: '32px',
+                  width: '32px', height: '32px', flexShrink: 0,
                   background: hoveredAction === i ? 'rgba(184,155,94,0.15)' : 'rgba(184,155,94,0.08)',
                   border: `1px solid ${hoveredAction === i ? 'rgba(184,155,94,0.3)' : 'rgba(184,155,94,0.18)'}`,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  flexShrink: 0, fontSize: '16px', transition: 'all .22s',
+                  fontSize: '16px', transition: 'all .22s',
                 }}>
                   {action.icon}
                 </div>
@@ -298,7 +323,7 @@ export default function Dashboard() {
           </div>
 
           {/* STATUS */}
-          <div style={{ padding: '20px' }}>
+          <div style={{ padding: isMobile ? '16px' : '20px' }}>
             <div style={{ fontSize: '9px', letterSpacing: '.22em', textTransform: 'uppercase', color: 'rgba(31,46,35,0.35)', marginBottom: '12px', paddingBottom: '10px', borderBottom: '1px solid rgba(31,46,35,0.07)' }}>
               System Status
             </div>
@@ -316,12 +341,8 @@ export default function Dashboard() {
                   background: item.badgeColor, color: item.badgeText,
                   border: `1px solid ${item.badgeBorder}`,
                   letterSpacing: '.08em', textTransform: 'uppercase' as const,
-                  textDecoration: 'none', cursor: 'pointer',
-                  transition: 'all 0.18s ease', display: 'inline-block',
-                }}
-                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = 'scale(1.05)'; (e.currentTarget as HTMLElement).style.opacity = '0.85' }}
-                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = 'scale(1)'; (e.currentTarget as HTMLElement).style.opacity = '1' }}
-                >
+                  textDecoration: 'none', cursor: 'pointer', display: 'inline-block',
+                }}>
                   {item.badge}
                 </a>
               </div>
@@ -352,7 +373,7 @@ export default function Dashboard() {
         </div>
       </main>
 
-      {/* Mobile Bottom Nav */}
+      {/* MOBILE BOTTOM NAV */}
       {isMobile && (
         <div style={{
           position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 100,
@@ -371,12 +392,13 @@ export default function Dashboard() {
               display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px',
               textDecoration: 'none', flex: 1,
             }}>
-              <div style={{ fontSize: item.icon === '+' ? '22px' : '16px', color: '#B89B5E' }}>{item.icon}</div>
-              <div style={{ fontSize: '9px', color: 'rgba(245,243,239,0.5)', letterSpacing: '.04em' }}>{item.label}</div>
+              <div style={{ fontSize: item.icon === '+' ? '22px' : '16px', color: item.href === '/dashboard' ? '#B89B5E' : 'rgba(245,243,239,0.5)' }}>{item.icon}</div>
+              <div style={{ fontSize: '9px', color: item.href === '/dashboard' ? '#B89B5E' : 'rgba(245,243,239,0.4)', letterSpacing: '.04em' }}>{item.label}</div>
             </a>
           ))}
         </div>
       )}
+
     </div>
   )
 }

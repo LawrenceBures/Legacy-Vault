@@ -17,6 +17,14 @@ export default function NewEntryPage() {
   const { getToken } = useAuth()
   const router = useRouter()
 
+  const [isMobile, setIsMobile] = useState(false)
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768)
+    check()
+    window.addEventListener('resize', check)
+    return () => window.removeEventListener('resize', check)
+  }, [])
+
   useEffect(() => {
     if (user) {
       fetch(`/api/dashboard?clerk_id=${user.id}&email=${user.emailAddresses[0].emailAddress}&full_name=${user.fullName || ''}`)
@@ -25,6 +33,7 @@ export default function NewEntryPage() {
         .catch(console.error)
     }
   }, [user])
+
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [hoveredNav, setHoveredNav] = useState<number | null>(null)
   const [step, setStep] = useState<Step>(1)
@@ -54,51 +63,30 @@ export default function NewEntryPage() {
     return createSupabaseClient(token!)
   }, [getToken])
 
-  const ensureProfile = useCallback(async () => {
-    if (!user) return
-    const supabase = await getSupabase()
-    const { data } = await supabase.from('profiles').select('id').eq('clerk_id', user.id).single()
-    if (!data) {
-      await supabase.from('profiles').insert({
-        id: crypto.randomUUID(),
-        clerk_id: user.id,
-        email: user.emailAddresses[0].emailAddress,
-        full_name: user.fullName || user.firstName || '',
-        plan: 'pro',
-      })
-    }
-  }, [user, getSupabase])
-
   const handleSave = async () => {
     if (!user) return
     setSaving(true)
     setSaveError('')
     try {
       const supabase = await getSupabase()
-      // Upsert profile and get id
       const profileId = crypto.randomUUID()
-      const upsertResult = await supabase.from('profiles').upsert({
+      await supabase.from('profiles').upsert({
         id: profileId,
         clerk_id: user.id,
         email: user.emailAddresses[0].emailAddress,
         full_name: user.fullName || user.firstName || '',
         plan: 'pro',
       }, { onConflict: 'clerk_id' })
-      console.log('upsert result:', JSON.stringify(upsertResult))
 
       const profileResult = await supabase
         .from('profiles')
         .select('id')
         .eq('clerk_id', user.id)
         .single()
-      console.log('profile result:', JSON.stringify(profileResult))
       const profile = profileResult.data
-
       if (!profile) throw new Error('Profile not found')
 
       let mediaUrl = null
-
-      // Upload file if present
       if (uploadedFile && (entryType === 'video' || entryType === 'audio')) {
         const ext = uploadedFile.name.split('.').pop()
         const filePath = `${user.id}/${Date.now()}.${ext}`
@@ -109,7 +97,6 @@ export default function NewEntryPage() {
         mediaUrl = filePath
       }
 
-      // Save entry
       const { error } = await supabase.from('vault_entries').insert({
         user_id: profile.id,
         title: title.trim(),
@@ -181,13 +168,15 @@ export default function NewEntryPage() {
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: '#F5F3EF' }}>
 
-      {/* SIDEBAR */}
+      {/* SIDEBAR — desktop only */}
       <aside
         onMouseEnter={() => setSidebarOpen(true)}
         onMouseLeave={() => setSidebarOpen(false)}
         style={{
+          display: isMobile ? 'none' : 'flex',
+          flexDirection: 'column',
           width: sidebarOpen ? '200px' : '64px',
-          background: '#1F2E23', display: 'flex', flexDirection: 'column',
+          background: '#1F2E23',
           alignItems: sidebarOpen ? 'flex-start' : 'center',
           padding: '20px 0', gap: '6px',
           borderRight: '1px solid rgba(184,155,94,0.1)',
@@ -205,7 +194,7 @@ export default function NewEntryPage() {
           paddingRight: sidebarOpen ? '20px' : '0',
           transition: 'all 0.25s ease', whiteSpace: 'nowrap',
         }}>
-          {sidebarOpen ? 'Legacy Vault' : 'L\nV'}
+          {sidebarOpen ? 'Legacy Vault' : 'LV'}
         </div>
 
         {navItems.map((item, i) => (
@@ -236,29 +225,36 @@ export default function NewEntryPage() {
           display: 'flex', justifyContent: sidebarOpen ? 'flex-start' : 'center',
           transition: 'all 0.25s ease',
         }}>
-          <UserButton  />
+          <UserButton />
         </div>
       </aside>
 
       {/* MAIN */}
-      <main style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
+      <main style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', paddingBottom: isMobile ? '70px' : '0' }}>
 
         {/* HEADER */}
-        <div style={{ padding: '28px 28px 24px', background: '#F5F3EF', borderBottom: '1px solid rgba(31,46,35,0.08)' }}>
+        <div style={{ padding: isMobile ? '20px 16px 16px' : '28px 28px 24px', background: '#F5F3EF', borderBottom: '1px solid rgba(31,46,35,0.08)' }}>
           <div style={{ fontSize: '9px', letterSpacing: '.25em', textTransform: 'uppercase', color: '#B89B5E', marginBottom: '8px' }}>New Entry</div>
-          <div style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '36px', fontWeight: 300, color: '#1F2E23', lineHeight: 1.1, marginBottom: '6px' }}>
+          <div style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: isMobile ? '28px' : '36px', fontWeight: 300, color: '#1F2E23', lineHeight: 1.1, marginBottom: '6px' }}>
             Create a <em style={{ color: '#B89B5E', fontStyle: 'italic' }}>Legacy Entry.</em>
           </div>
-          <div style={{ fontSize: '13px', color: 'rgba(31,46,35,0.45)', fontFamily: 'Cormorant Garamond, serif', fontStyle: 'italic' }}>
-            Your words, preserved for the people who matter most.
-          </div>
+          {!isMobile && (
+            <div style={{ fontSize: '13px', color: 'rgba(31,46,35,0.45)', fontFamily: 'Cormorant Garamond, serif', fontStyle: 'italic' }}>
+              Your words, preserved for the people who matter most.
+            </div>
+          )}
         </div>
 
         {/* STEP INDICATOR */}
-        <div style={{ padding: '20px 28px', background: '#fff', borderBottom: '1px solid rgba(31,46,35,0.08)', display: 'flex', gap: '0', alignItems: 'center' }}>
+        <div style={{
+          padding: isMobile ? '12px 16px' : '20px 28px',
+          background: '#fff', borderBottom: '1px solid rgba(31,46,35,0.08)',
+          display: 'flex', gap: '0', alignItems: 'center',
+          overflowX: 'auto', scrollbarWidth: 'none',
+        }}>
           {steps.map((s, i) => (
             <div key={s.num} style={{ display: 'flex', alignItems: 'center', flex: i < steps.length - 1 ? 1 : 'none' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '4px' : '8px', flexShrink: 0 }}>
                 <div style={{
                   width: '26px', height: '26px', borderRadius: '50%',
                   background: step === s.num ? '#1F2E23' : step > s.num ? '#B89B5E' : 'rgba(31,46,35,0.08)',
@@ -268,48 +264,50 @@ export default function NewEntryPage() {
                 }}>
                   {step > s.num ? '✓' : s.num}
                 </div>
-                <span style={{
-                  fontSize: '10px', letterSpacing: '.1em', textTransform: 'uppercase',
-                  color: step === s.num ? '#1F2E23' : step > s.num ? '#B89B5E' : 'rgba(31,46,35,0.3)',
-                  fontWeight: step === s.num ? 600 : 400, transition: 'all 0.22s ease',
-                }}>
-                  {s.label}
-                </span>
+                {!isMobile && (
+                  <span style={{
+                    fontSize: '10px', letterSpacing: '.1em', textTransform: 'uppercase',
+                    color: step === s.num ? '#1F2E23' : step > s.num ? '#B89B5E' : 'rgba(31,46,35,0.3)',
+                    fontWeight: step === s.num ? 600 : 400, transition: 'all 0.22s ease',
+                  }}>
+                    {s.label}
+                  </span>
+                )}
               </div>
               {i < steps.length - 1 && (
-                <div style={{ flex: 1, height: '1px', background: step > s.num ? '#B89B5E' : 'rgba(31,46,35,0.1)', margin: '0 12px', transition: 'background 0.22s ease' }} />
+                <div style={{ flex: 1, height: '1px', background: step > s.num ? '#B89B5E' : 'rgba(31,46,35,0.1)', margin: '0 8px', transition: 'background 0.22s ease' }} />
               )}
             </div>
           ))}
         </div>
 
         {/* STEP CONTENT */}
-        <div style={{ flex: 1, padding: '40px 28px', maxWidth: '680px', width: '100%', margin: '0 auto' }}>
+        <div style={{ flex: 1, padding: isMobile ? '24px 16px' : '40px 28px', maxWidth: '680px', width: '100%', margin: '0 auto', boxSizing: 'border-box' as const }}>
 
           {/* STEP 1 */}
           {step === 1 && (
             <div>
-              <div style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '22px', fontWeight: 300, color: '#1F2E23', marginBottom: '6px' }}>
+              <div style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: isMobile ? '20px' : '22px', fontWeight: 300, color: '#1F2E23', marginBottom: '6px' }}>
                 What type of entry are you creating?
               </div>
-              <div style={{ fontSize: '12px', color: 'rgba(31,46,35,0.4)', marginBottom: '28px' }}>
+              <div style={{ fontSize: '12px', color: 'rgba(31,46,35,0.4)', marginBottom: '24px' }}>
                 Choose the format that best captures what you want to leave behind.
               </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 {entryTypes.map((type) => (
                   <div key={type.id} onClick={() => setEntryType(type.id as EntryType)}
                     onMouseEnter={() => setHoveredType(type.id)} onMouseLeave={() => setHoveredType(null)}
                     style={{
-                      padding: '20px 24px',
+                      padding: isMobile ? '16px' : '20px 24px',
                       border: `1px solid ${entryType === type.id ? '#B89B5E' : hoveredType === type.id ? 'rgba(184,155,94,0.4)' : 'rgba(31,46,35,0.12)'}`,
                       borderRadius: '6px', background: entryType === type.id ? 'rgba(184,155,94,0.06)' : '#fff',
-                      cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '18px', transition: 'all 0.2s ease',
+                      cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '16px', transition: 'all 0.2s ease',
                     }}
                   >
-                    <div style={{ fontSize: '28px', flexShrink: 0 }}>{type.icon}</div>
+                    <div style={{ fontSize: '24px', flexShrink: 0 }}>{type.icon}</div>
                     <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: '14px', fontWeight: 500, color: '#1F2E23', marginBottom: '3px' }}>{type.label}</div>
-                      <div style={{ fontSize: '12px', color: 'rgba(31,46,35,0.45)' }}>{type.desc}</div>
+                      <div style={{ fontSize: '14px', fontWeight: 500, color: '#1F2E23', marginBottom: '2px' }}>{type.label}</div>
+                      {!isMobile && <div style={{ fontSize: '12px', color: 'rgba(31,46,35,0.45)' }}>{type.desc}</div>}
                     </div>
                     <div style={{
                       width: '20px', height: '20px', borderRadius: '50%',
@@ -329,8 +327,8 @@ export default function NewEntryPage() {
           {/* STEP 2 */}
           {step === 2 && (
             <div>
-              <div style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '22px', fontWeight: 300, color: '#1F2E23', marginBottom: '6px' }}>Name your entry.</div>
-              <div style={{ fontSize: '12px', color: 'rgba(31,46,35,0.4)', marginBottom: '28px' }}>Give this entry a title so you and your recipients can identify it.</div>
+              <div style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: isMobile ? '20px' : '22px', fontWeight: 300, color: '#1F2E23', marginBottom: '6px' }}>Name your entry.</div>
+              <div style={{ fontSize: '12px', color: 'rgba(31,46,35,0.4)', marginBottom: '24px' }}>Give this entry a title so you and your recipients can identify it.</div>
               <div style={{ marginBottom: '20px' }}>
                 <label style={{ fontSize: '10px', letterSpacing: '.15em', textTransform: 'uppercase', color: 'rgba(31,46,35,0.5)', display: 'block', marginBottom: '8px' }}>Entry Title *</label>
                 <input type="text"
@@ -351,10 +349,10 @@ export default function NewEntryPage() {
           {/* STEP 3 */}
           {step === 3 && (
             <div>
-              <div style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '22px', fontWeight: 300, color: '#1F2E23', marginBottom: '6px' }}>
+              <div style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: isMobile ? '20px' : '22px', fontWeight: 300, color: '#1F2E23', marginBottom: '6px' }}>
                 {entryType === 'text' ? 'Write your message.' : entryType === 'video' ? 'Add your video.' : 'Add your audio.'}
               </div>
-              <div style={{ fontSize: '12px', color: 'rgba(31,46,35,0.4)', marginBottom: '28px' }}>
+              <div style={{ fontSize: '12px', color: 'rgba(31,46,35,0.4)', marginBottom: '24px' }}>
                 {entryType === 'text' ? 'Write what you want your loved ones to receive.' : 'Upload a file or record directly in your browser.'}
               </div>
 
@@ -365,19 +363,19 @@ export default function NewEntryPage() {
                     recipientName={undefined}
                     entryTitle={title}
                   />
-                  <textarea placeholder="Dear..."  value={message} onChange={e => setMessage(e.target.value)} rows={12}
-                  style={{ ...inputStyle, resize: 'vertical', minHeight: '280px', fontFamily: 'Cormorant Garamond, serif', fontSize: '16px', lineHeight: 1.8 }} />
+                  <textarea placeholder="Dear..." value={message} onChange={e => setMessage(e.target.value)}
+                    rows={isMobile ? 8 : 12}
+                    style={{ ...inputStyle, resize: 'vertical', minHeight: isMobile ? '200px' : '280px', fontFamily: 'Cormorant Garamond, serif', fontSize: '16px', lineHeight: 1.8 }} />
                 </div>
               )}
 
               {(entryType === 'video' || entryType === 'audio') && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                  {/* Upload */}
                   <div onClick={() => fileInputRef.current?.click()}
                     onMouseEnter={() => setHoveredBtn('upload')} onMouseLeave={() => setHoveredBtn(null)}
                     style={{
                       border: `2px dashed ${uploadedFile ? '#B89B5E' : hoveredBtn === 'upload' ? 'rgba(184,155,94,0.5)' : 'rgba(31,46,35,0.15)'}`,
-                      borderRadius: '6px', padding: '32px', textAlign: 'center', cursor: 'pointer',
+                      borderRadius: '6px', padding: isMobile ? '24px 16px' : '32px', textAlign: 'center', cursor: 'pointer',
                       background: uploadedFile ? 'rgba(184,155,94,0.04)' : '#fff', transition: 'all 0.2s ease',
                     }}
                   >
@@ -386,7 +384,7 @@ export default function NewEntryPage() {
                       {uploadedFile ? uploadedFile.name : `Upload a ${entryType} file`}
                     </div>
                     <div style={{ fontSize: '11px', color: 'rgba(31,46,35,0.4)' }}>
-                      {uploadedFile ? 'Click to replace' : `Click to browse · ${entryType === 'video' ? 'MP4, MOV, WebM' : 'MP3, WAV, M4A'}`}
+                      {uploadedFile ? 'Click to replace' : `${entryType === 'video' ? 'MP4, MOV, WebM' : 'MP3, WAV, M4A'}`}
                     </div>
                     <input ref={fileInputRef} type="file" accept={entryType === 'video' ? 'video/*' : 'audio/*'}
                       style={{ display: 'none' }}
@@ -395,7 +393,6 @@ export default function NewEntryPage() {
 
                   <div style={{ textAlign: 'center', fontSize: '11px', color: 'rgba(31,46,35,0.3)', letterSpacing: '.08em' }}>— OR —</div>
 
-                  {/* Real recorder */}
                   {entryType === 'video' && showVideoAssist && (
                     <VideoAssist
                       entryTitle={title}
@@ -407,7 +404,7 @@ export default function NewEntryPage() {
                   {!showRecorder && !recordedBlob && (
                     <div onClick={() => { setShowRecorder(true); setUploadedFile(null) }}
                       onMouseEnter={() => setHoveredBtn('record')} onMouseLeave={() => setHoveredBtn(null)}
-                      style={{ border: `1px solid ${hoveredBtn === 'record' ? 'rgba(184,155,94,0.4)' : 'rgba(31,46,35,0.12)'}`, borderRadius: '6px', padding: '24px', textAlign: 'center', cursor: 'pointer', background: '#fff', transition: 'all 0.2s ease' }}>
+                      style={{ border: `1px solid ${hoveredBtn === 'record' ? 'rgba(184,155,94,0.4)' : 'rgba(31,46,35,0.12)'}`, borderRadius: '6px', padding: '24px 16px', textAlign: 'center', cursor: 'pointer', background: '#fff', transition: 'all 0.2s ease' }}>
                       <div style={{ fontSize: '28px', marginBottom: '10px' }}>{entryType === 'video' ? '🎥' : '🎙️'}</div>
                       <div style={{ fontSize: '13px', color: '#1F2E23', fontWeight: 500, marginBottom: '4px' }}>Record {entryType} now</div>
                       {entryType === 'video' && !showVideoAssist && (
@@ -416,7 +413,9 @@ export default function NewEntryPage() {
                           ✨ Give me something to say
                         </div>
                       )}
-                      <div style={{ fontSize: '11px', color: 'rgba(31,46,35,0.4)' }}>Uses your browser {entryType === 'video' ? 'camera & microphone' : 'microphone'}</div>
+                      <div style={{ fontSize: '11px', color: 'rgba(31,46,35,0.4)', marginTop: '4px' }}>
+                        Uses your {entryType === 'video' ? 'camera & microphone' : 'microphone'} · 15 sec limit pre-launch
+                      </div>
                     </div>
                   )}
 
@@ -434,7 +433,7 @@ export default function NewEntryPage() {
                         <div style={{ fontSize: '24px' }}>✅</div>
                         <div>
                           <div style={{ fontSize: '13px', fontWeight: 500, color: '#1F2E23' }}>Recording saved</div>
-                          <div style={{ fontSize: '11px', color: 'rgba(31,46,35,0.4)' }}>Will upload when you save your entry</div>
+                          <div style={{ fontSize: '11px', color: 'rgba(31,46,35,0.4)' }}>Will upload when you save</div>
                         </div>
                         <button onClick={() => { setRecordedBlob(null); setRecordedUrl(null); setRecorded(false) }}
                           style={{ marginLeft: 'auto', padding: '6px 12px', border: '1px solid rgba(31,46,35,0.15)', borderRadius: '4px', background: 'transparent', color: 'rgba(31,46,35,0.5)', fontSize: '10px', cursor: 'pointer', letterSpacing: '.08em', textTransform: 'uppercase' }}>
@@ -457,10 +456,10 @@ export default function NewEntryPage() {
           {/* STEP 4 */}
           {step === 4 && (
             <div>
-              <div style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '22px', fontWeight: 300, color: '#1F2E23', marginBottom: '6px' }}>
+              <div style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: isMobile ? '20px' : '22px', fontWeight: 300, color: '#1F2E23', marginBottom: '6px' }}>
                 Review your entry.
               </div>
-              <div style={{ fontSize: '12px', color: 'rgba(31,46,35,0.4)', marginBottom: '28px' }}>
+              <div style={{ fontSize: '12px', color: 'rgba(31,46,35,0.4)', marginBottom: '24px' }}>
                 Everything look right? Save it to your vault.
               </div>
 
@@ -470,9 +469,9 @@ export default function NewEntryPage() {
                   { label: 'Title', value: title },
                   { label: 'Content', value: entryType === 'text' ? (message.length > 80 ? message.slice(0, 80) + '...' : message) : uploadedFile ? uploadedFile.name : recorded ? 'Browser recording' : '—' },
                 ].map((row, i) => (
-                  <div key={i} style={{ display: 'flex', padding: '14px 20px', borderBottom: i < 2 ? '1px solid rgba(31,46,35,0.07)' : 'none' }}>
-                    <div style={{ width: '100px', fontSize: '10px', letterSpacing: '.12em', textTransform: 'uppercase', color: 'rgba(31,46,35,0.4)', flexShrink: 0, paddingTop: '1px' }}>{row.label}</div>
-                    <div style={{ fontSize: '13px', color: '#1F2E23' }}>{row.value}</div>
+                  <div key={i} style={{ display: 'flex', padding: '14px 16px', borderBottom: i < 2 ? '1px solid rgba(31,46,35,0.07)' : 'none', gap: '12px' }}>
+                    <div style={{ width: '70px', fontSize: '10px', letterSpacing: '.12em', textTransform: 'uppercase', color: 'rgba(31,46,35,0.4)', flexShrink: 0, paddingTop: '1px' }}>{row.label}</div>
+                    <div style={{ fontSize: '13px', color: '#1F2E23', flex: 1 }}>{row.value}</div>
                   </div>
                 ))}
               </div>
@@ -483,28 +482,27 @@ export default function NewEntryPage() {
                 </div>
               )}
 
-              <div style={{ marginTop: '16px', padding: '14px 20px', background: 'rgba(184,155,94,0.06)', border: '1px solid rgba(184,155,94,0.2)', borderRadius: '6px', fontSize: '12px', color: 'rgba(31,46,35,0.6)', lineHeight: 1.6 }}>
+              <div style={{ marginTop: '16px', padding: '14px 16px', background: 'rgba(184,155,94,0.06)', border: '1px solid rgba(184,155,94,0.2)', borderRadius: '6px', fontSize: '12px', color: 'rgba(31,46,35,0.6)', lineHeight: 1.6 }}>
                 📌 Recipients and delivery timing can be assigned from your vault after saving.
               </div>
             </div>
           )}
 
           {/* NAV BUTTONS */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '40px', paddingTop: '24px', borderTop: '1px solid rgba(31,46,35,0.08)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '32px', paddingTop: '20px', borderTop: '1px solid rgba(31,46,35,0.08)', gap: '12px' }}>
             {step > 1 ? (
               <button onClick={() => setStep((step - 1) as Step)}
-                onMouseEnter={() => setHoveredBtn('back')} onMouseLeave={() => setHoveredBtn(null)}
                 style={{
-                  padding: '11px 24px', border: '1px solid rgba(31,46,35,0.2)', borderRadius: '4px',
-                  background: hoveredBtn === 'back' ? 'rgba(31,46,35,0.05)' : 'transparent',
-                  color: 'rgba(31,46,35,0.6)', fontSize: '11px', letterSpacing: '.1em',
-                  textTransform: 'uppercase', cursor: 'pointer', transition: 'all 0.18s ease',
+                  padding: '12px 20px', border: '1px solid rgba(31,46,35,0.2)', borderRadius: '4px',
+                  background: 'transparent', color: 'rgba(31,46,35,0.6)',
+                  fontSize: '11px', letterSpacing: '.1em', textTransform: 'uppercase',
+                  cursor: 'pointer', transition: 'all 0.18s ease', flexShrink: 0,
                 }}
               >
                 ← Back
               </button>
             ) : (
-              <a href="/vault" style={{ padding: '11px 24px', border: '1px solid rgba(31,46,35,0.2)', borderRadius: '4px', background: 'transparent', color: 'rgba(31,46,35,0.6)', fontSize: '11px', letterSpacing: '.1em', textTransform: 'uppercase', cursor: 'pointer', textDecoration: 'none' }}>
+              <a href="/vault" style={{ padding: '12px 20px', border: '1px solid rgba(31,46,35,0.2)', borderRadius: '4px', background: 'transparent', color: 'rgba(31,46,35,0.6)', fontSize: '11px', letterSpacing: '.1em', textTransform: 'uppercase', cursor: 'pointer', textDecoration: 'none', flexShrink: 0 }}>
                 Cancel
               </a>
             )}
@@ -512,14 +510,13 @@ export default function NewEntryPage() {
             <button
               onClick={() => { if (step < 4) setStep((step + 1) as Step); else handleSave() }}
               disabled={!canProceed() || saving}
-              onMouseEnter={() => setHoveredBtn('next')} onMouseLeave={() => setHoveredBtn(null)}
               style={{
-                padding: '11px 32px', border: '1px solid rgba(184,155,94,0.3)', borderRadius: '4px',
-                background: !canProceed() || saving ? 'rgba(31,46,35,0.08)' : hoveredBtn === 'next' ? '#B89B5E' : '#1F2E23',
-                color: !canProceed() || saving ? 'rgba(31,46,35,0.3)' : hoveredBtn === 'next' ? '#1F2E23' : '#B89B5E',
+                padding: '12px 28px', border: '1px solid rgba(184,155,94,0.3)', borderRadius: '4px',
+                background: !canProceed() || saving ? 'rgba(31,46,35,0.08)' : '#1F2E23',
+                color: !canProceed() || saving ? 'rgba(31,46,35,0.3)' : '#B89B5E',
                 fontSize: '11px', letterSpacing: '.1em', textTransform: 'uppercase',
                 cursor: canProceed() && !saving ? 'pointer' : 'not-allowed',
-                transition: 'all 0.18s ease', fontWeight: 500,
+                transition: 'all 0.18s ease', fontWeight: 500, flex: 1,
               }}
             >
               {step === 4 ? (saving ? 'Saving...' : 'Save to Vault →') : 'Continue →'}
@@ -528,6 +525,33 @@ export default function NewEntryPage() {
 
         </div>
       </main>
+
+      {/* MOBILE BOTTOM NAV */}
+      {isMobile && (
+        <div style={{
+          position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 100,
+          background: '#1F2E23', borderTop: '1px solid rgba(184,155,94,0.15)',
+          display: 'flex', alignItems: 'center', justifyContent: 'space-around',
+          padding: '8px 0', height: '60px',
+        }}>
+          {[
+            { icon: '⊞', label: 'Dashboard', href: '/dashboard' },
+            { icon: '🔒', label: 'Vault', href: '/vault' },
+            { icon: '+', label: 'New', href: '/new-entry' },
+            { icon: '👥', label: 'People', href: '/my-people' },
+            { icon: '⏱', label: 'Delivery', href: '/delivery' },
+          ].map(item => (
+            <a key={item.href} href={item.href} style={{
+              display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px',
+              textDecoration: 'none', flex: 1,
+            }}>
+              <div style={{ fontSize: item.icon === '+' ? '22px' : '16px', color: item.href === '/new-entry' ? '#B89B5E' : 'rgba(245,243,239,0.5)' }}>{item.icon}</div>
+              <div style={{ fontSize: '9px', color: item.href === '/new-entry' ? '#B89B5E' : 'rgba(245,243,239,0.4)', letterSpacing: '.04em' }}>{item.label}</div>
+            </a>
+          ))}
+        </div>
+      )}
+
     </div>
   )
 }
