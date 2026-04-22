@@ -1,6 +1,6 @@
 'use client'
 
-import { useUser, UserButton, useAuth } from '@clerk/nextjs'
+import { useUser, UserButton, useAuth, SignOutButton } from '@clerk/nextjs'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState, useCallback } from 'react'
 
@@ -189,12 +189,32 @@ export default function Dashboard() {
         ))}
 
         <div style={{
-          marginTop: 'auto', paddingBottom: '8px',
-          paddingLeft: sidebarOpen ? '20px' : '0', width: '100%',
-          display: 'flex', justifyContent: sidebarOpen ? 'flex-start' : 'center',
+          marginTop: 'auto',
+          paddingBottom: '8px',
+          paddingLeft: sidebarOpen ? '20px' : '0',
+          width: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: sidebarOpen ? 'flex-start' : 'center',
+          justifyContent: sidebarOpen ? 'flex-start' : 'center',
+          gap: '10px',
           transition: 'all 0.25s ease',
         }}>
           <UserButton />
+          <SignOutButton>
+            <button style={{
+              background: 'transparent',
+              border: 'none',
+              color: 'rgba(245,243,239,0.45)',
+              fontSize: '10px',
+              letterSpacing: '.12em',
+              textTransform: 'uppercase',
+              cursor: 'pointer',
+              padding: 0,
+            }}>
+              {sidebarOpen ? 'Sign out' : '↩'}
+            </button>
+          </SignOutButton>
         </div>
       </aside>
 
@@ -210,7 +230,16 @@ export default function Dashboard() {
             Welcome back, <em style={{ color: '#B89B5E', fontStyle: 'italic' }}>{firstName}.</em>
           </div>
           <div style={{ fontSize: '13px', color: 'rgba(31,46,35,0.45)', fontFamily: 'Cormorant Garamond, serif', fontStyle: 'italic' }}>
-            Your legacy is safe. Here's where things stand.
+            What you've built so far — preserved, structured, and ready when it matters.
+          </div>
+
+          <div style={{
+            marginTop: '10px',
+            fontSize: '12px',
+            color: 'rgba(31,46,35,0.35)',
+            fontStyle: 'italic'
+          }}>
+            Every entry you create becomes something someone may one day return to.
           </div>
         </div>
 
@@ -259,38 +288,8 @@ export default function Dashboard() {
           <div style={{ padding: isMobile ? '16px' : '20px', borderRight: isMobile ? 'none' : '1px solid rgba(31,46,35,0.08)', borderBottom: isMobile ? '1px solid rgba(31,46,35,0.08)' : 'none' }}>
             <div style={{ fontSize: '9px', letterSpacing: '.22em', textTransform: 'uppercase', color: 'rgba(31,46,35,0.35)', marginBottom: '12px', paddingBottom: '10px', borderBottom: '1px solid rgba(31,46,35,0.07)' }}>
 
-              {(!stats.plan || stats.plan === '' || stats.plan === 'pro') && (
-                <div style={{ background: '#1F2E23', border: '1px solid rgba(184,155,94,0.2)', borderRadius: '10px', padding: isMobile ? '1rem' : '1.5rem', marginBottom: '1.5rem' }}>
-                  <div style={{ marginBottom: '1rem' }}>
-                    <div style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: isMobile ? '17px' : '20px', fontWeight: 300, color: '#F5F3EF', marginBottom: '4px' }}>Lock in your founders price</div>
-                    <div style={{ fontSize: '13px', color: 'rgba(245,243,239,0.45)' }}>Grandfathered pricing forever · Launches May 15, 2026</div>
-                  </div>
-                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                    {[
-                      { tier: 'starter_founder', label: 'Starter', price: '$1.99' },
-                      { tier: 'basic_founder', label: 'Basic', price: '$4.99' },
-                      { tier: 'legacy_founder', label: 'Legacy', price: '$9.99' },
-                      { tier: 'family_founder', label: 'Family', price: '$19.99' },
-                      { tier: 'estate_founder', label: 'Estate', price: '$49.99' },
-                    ].map(plan => (
-                      <button key={plan.tier} onClick={() => handleUpgrade(plan.tier)}
-                        style={{
-                          padding: '8px 14px',
-                          background: plan.tier === 'legacy_founder' ? '#B89B5E' : 'transparent',
-                          color: plan.tier === 'legacy_founder' ? '#1F2E23' : '#B89B5E',
-                          border: '1px solid rgba(184,155,94,0.3)',
-                          borderRadius: '4px', fontSize: '11px', cursor: 'pointer',
-                          fontWeight: plan.tier === 'legacy_founder' ? 700 : 500,
-                        }}
-                      >
-                        {plan.label} {plan.price}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
 
-              Quick Actions
+              Continue Building Your Vault
             </div>
 
             {actions.map((action, i) => (
@@ -325,7 +324,7 @@ export default function Dashboard() {
           {/* STATUS */}
           <div style={{ padding: isMobile ? '16px' : '20px' }}>
             <div style={{ fontSize: '9px', letterSpacing: '.22em', textTransform: 'uppercase', color: 'rgba(31,46,35,0.35)', marginBottom: '12px', paddingBottom: '10px', borderBottom: '1px solid rgba(31,46,35,0.07)' }}>
-              System Status
+              Vault Status
             </div>
             {statuses.map((item, i) => (
               <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 0', borderBottom: '1px solid rgba(31,46,35,0.06)' }}>
@@ -351,7 +350,7 @@ export default function Dashboard() {
             {/* PROGRESS */}
             <div style={{ marginTop: '16px', paddingTop: '14px', borderTop: '1px solid rgba(31,46,35,0.07)' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                <div style={{ fontSize: '9px', letterSpacing: '.18em', textTransform: 'uppercase', color: 'rgba(31,46,35,0.35)' }}>Setup Progress</div>
+                <div style={{ fontSize: '9px', letterSpacing: '.18em', textTransform: 'uppercase', color: 'rgba(31,46,35,0.35)' }}>Vault Completion</div>
                 <div style={{ fontSize: '11px', color: '#B89B5E' }}>{progressPct}%</div>
               </div>
               <div style={{ height: '3px', background: 'rgba(31,46,35,0.08)' }}>
@@ -359,9 +358,9 @@ export default function Dashboard() {
               </div>
               {progressPct < 100 && (
                 <div style={{ marginTop: '10px', fontSize: '11px', color: 'rgba(31,46,35,0.4)' }}>
-                  {!progressSteps[0] && '→ Add your first vault entry'}
-                  {progressSteps[0] && !progressSteps[1] && '→ Add a recipient'}
-                  {progressSteps[0] && progressSteps[1] && !progressSteps[2] && '→ Configure delivery settings'}
+                  {!progressSteps[0] && '→ Start your first message'}
+                  {progressSteps[0] && !progressSteps[1] && '→ Choose who this is for'}
+                  {progressSteps[0] && progressSteps[1] && !progressSteps[2] && '→ Decide when it should be delivered'}
                 </div>
               )}
               {progressPct === 100 && (

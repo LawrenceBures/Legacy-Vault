@@ -1,15 +1,16 @@
 'use client'
 
-import { useUser, UserButton, useAuth } from '@clerk/nextjs'
+import { useUser, UserButton, useAuth, SignOutButton } from '@clerk/nextjs'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState, useRef, useCallback } from 'react'
 import { createSupabaseClient } from '@/lib/supabase-auth'
 import { AIWritingAssistant } from '@/lib/AIWritingAssistant'
+import MessageWritingPanel from '@/components/MessageWritingPanel'
 import { VaultMediaRecorder } from '@/lib/MediaRecorder'
 import { VideoAssist } from '@/lib/VideoAssist'
 import { canUseVideo, canUseAudio, canUseAI, getUpgradeMessage } from '@/lib/featureGating'
 
-type EntryType = 'video' | 'audio' | 'text' | null
+type EntryFormat = 'video' | 'audio' | 'text' | null
 type Step = 1 | 2 | 3 | 4
 
 export default function NewEntryPage() {
@@ -37,13 +38,13 @@ export default function NewEntryPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [hoveredNav, setHoveredNav] = useState<number | null>(null)
   const [step, setStep] = useState<Step>(1)
-  const [entryType, setEntryType] = useState<EntryType>(null)
-  const [title, setTitle] = useState('')
+  const [entryFormat, setEntryFormat] = useState<EntryFormat>(null)
+  const [title, setName] = useState('')
   const [message, setMessage] = useState('')
   const [uploadedFile, setUploadedFile] = useState<File | null>(null)
   const [recording, setRecording] = useState(false)
   const [recorded, setRecorded] = useState(false)
-  const [hoveredType, setHoveredType] = useState<string | null>(null)
+  const [hoveredFormat, setHoveredFormat] = useState<string | null>(null)
   const [hoveredBtn, setHoveredBtn] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
   const [recordedBlob, setRecordedBlob] = useState<Blob | null>(null)
@@ -67,58 +68,51 @@ export default function NewEntryPage() {
     if (!user) return
     setSaving(true)
     setSaveError('')
+
     try {
-      const supabase = await getSupabase()
-      const profileId = crypto.randomUUID()
-      await supabase.from('profiles').upsert({
-        id: profileId,
-        clerk_id: user.id,
-        email: user.emailAddresses[0].emailAddress,
-        full_name: user.fullName || user.firstName || '',
-        plan: 'pro',
-      }, { onConflict: 'clerk_id' })
+      const formData = new FormData()
+      formData.append('title', title)
+      formData.append('message', message)
+      formData.append('entryFormat', entryFormat || 'text')
+      formData.append('email', user.emailAddresses[0].emailAddress)
+      formData.append('full_name', user.fullName || user.firstName || '')
 
-      const profileResult = await supabase
-        .from('profiles')
-        .select('id')
-        .eq('clerk_id', user.id)
-        .single()
-      const profile = profileResult.data
-      if (!profile) throw new Error('Profile not found')
-
-      let mediaUrl = null
-      if (uploadedFile && (entryType === 'video' || entryType === 'audio')) {
-        const ext = uploadedFile.name.split('.').pop()
-        const filePath = `${user.id}/${Date.now()}.${ext}`
-        const { error: uploadError } = await supabase.storage
-          .from('vault-media')
-          .upload(filePath, uploadedFile)
-        if (uploadError) throw uploadError
-        mediaUrl = filePath
+      if (entryFormat === 'video' || entryFormat === 'audio') {
+        if (uploadedFile) {
+          formData.append('file', uploadedFile)
+        } else if (recordedBlob) {
+          const ext = entryFormat === 'audio' ? 'webm' : 'webm'
+          const mime = recordedBlob.type || (entryFormat === 'audio' ? 'audio/webm' : 'video/webm')
+          const recordedFile = new File(
+            [recordedBlob],
+            `recording-${Date.now()}.${ext}`,
+            { type: mime }
+          )
+          formData.append('file', recordedFile)
+        }
       }
 
-      const { error } = await supabase.from('vault_entries').insert({
-        user_id: profile.id,
-        title: title.trim(),
-        message_content: entryType === 'text' ? message.trim() : message.trim() || null,
-        format: entryType,
-        media_url: mediaUrl,
-        status: 'active',
-        delivery_trigger: 'inactivity',
-        inactivity_days: 60,
+      const res = await fetch('/api/vault/save-entry', {
+        method: 'POST',
+        body: formData,
       })
 
-      if (error) throw error
+      const data = await res.json()
+
+      if (!res.ok) throw new Error(data.error)
+
       router.push('/vault')
-    } catch (err: any) {
-      console.error('Save error:', err)
-      setSaveError('Something went wrong saving your entry. Please try again.')
+
+    } catch (err) {
+      console.error(err)
+      setSaveError('Something went wrong saving your entry.')
     } finally {
       setSaving(false)
     }
   }
 
-  if (!isLoaded || !user) return null
+
+if (!isLoaded || !user) return null
 
   const navItems = [
     { icon: '⊞', label: 'Dashboard', href: '/dashboard' },
@@ -128,24 +122,24 @@ export default function NewEntryPage() {
     { icon: '⏱', label: 'Delivery', href: '/delivery' },
   ]
 
-  const entryTypes = [
-    { id: 'video', icon: '🎥', label: 'Video Message', desc: 'Record or upload a personal video for your loved ones.' },
-    { id: 'audio', icon: '🎙️', label: 'Audio Message', desc: 'Record your voice or upload an audio file.' },
-    { id: 'text', icon: '✍️', label: 'Written Letter', desc: 'Write a letter, note, or document to be delivered.' },
+  const entryFormats = [
+    { id: 'video', icon: '🎥', label: 'Video Message', desc: 'Let them see you. Speak directly to the people who matter most.' },
+    { id: 'audio', icon: '🎙️', label: 'Voice Recording', desc: 'Sometimes your voice says more than anything written ever could.' },
+    { id: 'text', icon: '✍️', label: 'Written Letter', desc: 'Write something they can return to, again and again.' },
   ]
 
   const steps = [
-    { num: 1, label: 'Choose Type' },
-    { num: 2, label: 'Details' },
-    { num: 3, label: 'Content' },
+    { num: 1, label: 'Format' },
+    { num: 2, label: 'Name' },
+    { num: 3, label: 'Message' },
     { num: 4, label: 'Review' },
   ]
 
   const canProceed = () => {
-    if (step === 1) return entryType !== null
+    if (step === 1) return entryFormat !== null
     if (step === 2) return title.trim().length > 0
     if (step === 3) {
-      if (entryType === 'text') return message.trim().length > 0
+      if (entryFormat === 'text') return message.trim().length > 0
       return uploadedFile !== null || recorded
     }
     return true
@@ -204,8 +198,8 @@ export default function NewEntryPage() {
             style={{
               width: sidebarOpen ? 'calc(100% - 16px)' : '40px', height: '40px',
               display: 'flex', alignItems: 'center',
-              justifyContent: sidebarOpen ? 'flex-start' : 'center',
-              gap: '10px', borderRadius: '8px',
+              justifyMessage: sidebarOpen ? 'flex-start' : 'center',
+              gap: '10px', borderRadius: '12px',
               color: item.active ? '#B89B5E' : hoveredNav === i ? '#F5F3EF' : 'rgba(245,243,239,0.35)',
               background: item.active ? 'rgba(184,155,94,0.15)' : hoveredNav === i ? 'rgba(245,243,239,0.06)' : 'transparent',
               cursor: 'pointer', fontSize: '16px', textDecoration: 'none',
@@ -222,7 +216,7 @@ export default function NewEntryPage() {
         <div style={{
           marginTop: 'auto', paddingBottom: '8px',
           paddingLeft: sidebarOpen ? '20px' : '0', width: '100%',
-          display: 'flex', justifyContent: sidebarOpen ? 'flex-start' : 'center',
+          display: 'flex', justifyMessage: sidebarOpen ? 'flex-start' : 'center',
           transition: 'all 0.25s ease',
         }}>
           <UserButton />
@@ -234,15 +228,17 @@ export default function NewEntryPage() {
 
         {/* HEADER */}
         <div style={{ padding: isMobile ? '20px 16px 16px' : '28px 28px 24px', background: '#F5F3EF', borderBottom: '1px solid rgba(31,46,35,0.08)' }}>
-          <div style={{ fontSize: '9px', letterSpacing: '.25em', textTransform: 'uppercase', color: '#B89B5E', marginBottom: '8px' }}>New Entry</div>
+          <div style={{ fontSize: '9px', letterSpacing: '.25em', textTransform: 'uppercase', color: '#B89B5E', marginBottom: '8px' }}>Create Message</div>
           <div style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: isMobile ? '28px' : '36px', fontWeight: 300, color: '#1F2E23', lineHeight: 1.1, marginBottom: '6px' }}>
-            Create a <em style={{ color: '#B89B5E', fontStyle: 'italic' }}>Legacy Entry.</em>
+            What do you want to <em style={{ color: '#B89B5E', fontStyle: 'italic' }}>leave behind?</em>
           </div>
           {!isMobile && (
             <div style={{ fontSize: '13px', color: 'rgba(31,46,35,0.45)', fontFamily: 'Cormorant Garamond, serif', fontStyle: 'italic' }}>
-              Your words, preserved for the people who matter most.
+              Choose the format that feels most natural. You can refine the rest as you go.
             </div>
           )}
+
+          
         </div>
 
         {/* STEP INDICATOR */}
@@ -257,9 +253,9 @@ export default function NewEntryPage() {
               <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '4px' : '8px', flexShrink: 0 }}>
                 <div style={{
                   width: '26px', height: '26px', borderRadius: '50%',
-                  background: step === s.num ? '#1F2E23' : step > s.num ? '#B89B5E' : 'rgba(31,46,35,0.08)',
-                  color: step === s.num ? '#B89B5E' : step > s.num ? '#1F2E23' : 'rgba(31,46,35,0.3)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  background: step === s.num ? '#1F2E23' : step > s.num ? '#C2A468' : 'rgba(31,46,35,0.08)',
+                  color: step === s.num ? '#C2A468' : step > s.num ? '#1F2E23' : 'rgba(31,46,35,0.3)',
+                  display: 'flex', alignItems: 'center', justifyMessage: 'center',
                   fontSize: '11px', fontWeight: 600, flexShrink: 0, transition: 'all 0.22s ease',
                 }}>
                   {step > s.num ? '✓' : s.num}
@@ -294,13 +290,13 @@ export default function NewEntryPage() {
                 Choose the format that best captures what you want to leave behind.
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                {entryTypes.map((type) => (
-                  <div key={type.id} onClick={() => setEntryType(type.id as EntryType)}
-                    onMouseEnter={() => setHoveredType(type.id)} onMouseLeave={() => setHoveredType(null)}
+                {entryFormats.map((type) => (
+                  <div key={type.id} onClick={() => setEntryFormat(type.id as EntryFormat)}
+                    onMouseEnter={() => setHoveredFormat(type.id)} onMouseLeave={() => setHoveredFormat(null)}
                     style={{
                       padding: isMobile ? '16px' : '20px 24px',
-                      border: `1px solid ${entryType === type.id ? '#B89B5E' : hoveredType === type.id ? 'rgba(184,155,94,0.4)' : 'rgba(31,46,35,0.12)'}`,
-                      borderRadius: '6px', background: entryType === type.id ? 'rgba(184,155,94,0.06)' : '#fff',
+                      border: `1px solid ${entryFormat === type.id ? '#B89B5E' : hoveredFormat === type.id ? 'rgba(184,155,94,0.4)' : 'rgba(31,46,35,0.12)'}`,
+                      borderRadius: '6px', background: entryFormat === type.id ? 'rgba(184,155,94,0.06)' : '#fff',
                       cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '16px', transition: 'all 0.2s ease',
                     }}
                   >
@@ -311,12 +307,12 @@ export default function NewEntryPage() {
                     </div>
                     <div style={{
                       width: '20px', height: '20px', borderRadius: '50%',
-                      border: `2px solid ${entryType === type.id ? '#B89B5E' : 'rgba(31,46,35,0.2)'}`,
-                      background: entryType === type.id ? '#B89B5E' : 'transparent',
+                      border: `2px solid ${entryFormat === type.id ? '#B89B5E' : 'rgba(31,46,35,0.2)'}`,
+                      background: entryFormat === type.id ? '#B89B5E' : 'transparent',
                       flexShrink: 0, transition: 'all 0.18s ease',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      display: 'flex', alignItems: 'center', justifyMessage: 'center',
                     }}>
-                      {entryType === type.id && <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#fff' }} />}
+                      {entryFormat === type.id && <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#fff' }} />}
                     </div>
                   </div>
                 ))}
@@ -330,10 +326,10 @@ export default function NewEntryPage() {
               <div style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: isMobile ? '20px' : '22px', fontWeight: 300, color: '#1F2E23', marginBottom: '6px' }}>Name your entry.</div>
               <div style={{ fontSize: '12px', color: 'rgba(31,46,35,0.4)', marginBottom: '24px' }}>Give this entry a title so you and your recipients can identify it.</div>
               <div style={{ marginBottom: '20px' }}>
-                <label style={{ fontSize: '10px', letterSpacing: '.15em', textTransform: 'uppercase', color: 'rgba(31,46,35,0.5)', display: 'block', marginBottom: '8px' }}>Entry Title *</label>
+                <label style={{ fontSize: '10px', letterSpacing: '.15em', textTransform: 'uppercase', color: 'rgba(31,46,35,0.5)', display: 'block', marginBottom: '8px' }}>Entry Name *</label>
                 <input type="text"
-                  placeholder={entryType === 'video' ? 'e.g. A message for my daughter' : entryType === 'audio' ? 'e.g. Words from Dad' : 'e.g. Letter to my family'}
-                  value={title} onChange={e => setTitle(e.target.value)} style={inputStyle} />
+                  placeholder={entryFormat === 'video' ? 'e.g. A message for my daughter' : entryFormat === 'audio' ? 'e.g. Words from Dad' : 'e.g. Letter to my family'}
+                  value={title} onChange={e => setName(e.target.value)} style={inputStyle} />
               </div>
               <div>
                 <label style={{ fontSize: '10px', letterSpacing: '.15em', textTransform: 'uppercase', color: 'rgba(31,46,35,0.5)', display: 'block', marginBottom: '8px' }}>
@@ -350,26 +346,35 @@ export default function NewEntryPage() {
           {step === 3 && (
             <div>
               <div style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: isMobile ? '20px' : '22px', fontWeight: 300, color: '#1F2E23', marginBottom: '6px' }}>
-                {entryType === 'text' ? 'Write your message.' : entryType === 'video' ? 'Add your video.' : 'Add your audio.'}
+                {entryFormat === 'text' ? 'Write what matters most.' : entryFormat === 'video' ? 'Record what they should see and hear.' : 'Record what they should hear.'}
               </div>
               <div style={{ fontSize: '12px', color: 'rgba(31,46,35,0.4)', marginBottom: '24px' }}>
-                {entryType === 'text' ? 'Write what you want your loved ones to receive.' : 'Upload a file or record directly in your browser.'}
+                {entryFormat === 'text' ? 'Start simply. You can shape the message as it comes.' : 'Upload a file or record directly in your browser.'}
               </div>
 
-              {entryType === 'text' && (
-                <div>
-                  <AIWritingAssistant
-                    onUseMessage={(text) => setMessage(text)}
-                    recipientName={undefined}
-                    entryTitle={title}
+              {entryFormat === 'text' && (
+                <div style={{
+                  background: '#F8F6F1',
+                  borderRadius: '12px',
+                  padding: isMobile ? '20px 16px' : '28px 28px',
+                  border: '1px solid rgba(31,46,35,0.06)',
+                }}>
+                  <MessageWritingPanel
+                    value={message}
+                    onChange={setMessage}
+                    maxLength={2000}
                   />
-                  <textarea placeholder="Dear..." value={message} onChange={e => setMessage(e.target.value)}
-                    rows={isMobile ? 8 : 12}
-                    style={{ ...inputStyle, resize: 'vertical', minHeight: isMobile ? '200px' : '280px', fontFamily: 'Cormorant Garamond, serif', fontSize: '16px', lineHeight: 1.8 }} />
+                  <div style={{ marginTop: '18px', borderTop: '1px solid rgba(184,155,94,0.10)', paddingTop: '18px' }}>
+                    <AIWritingAssistant
+                      onUseMessage={(text) => setMessage(text)}
+                      recipientName={undefined}
+                      entryName={title}
+                    />
+                  </div>
                 </div>
               )}
 
-              {(entryType === 'video' || entryType === 'audio') && (
+              {(entryFormat === 'video' || entryFormat === 'audio') && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                   <div onClick={() => fileInputRef.current?.click()}
                     onMouseEnter={() => setHoveredBtn('upload')} onMouseLeave={() => setHoveredBtn(null)}
@@ -381,21 +386,21 @@ export default function NewEntryPage() {
                   >
                     <div style={{ fontSize: '28px', marginBottom: '10px' }}>{uploadedFile ? '✅' : '📁'}</div>
                     <div style={{ fontSize: '13px', color: '#1F2E23', fontWeight: 500, marginBottom: '4px' }}>
-                      {uploadedFile ? uploadedFile.name : `Upload a ${entryType} file`}
+                      {uploadedFile ? uploadedFile.name : `Upload a ${entryFormat} file`}
                     </div>
                     <div style={{ fontSize: '11px', color: 'rgba(31,46,35,0.4)' }}>
-                      {uploadedFile ? 'Click to replace' : `${entryType === 'video' ? 'MP4, MOV, WebM' : 'MP3, WAV, M4A'}`}
+                      {uploadedFile ? 'Click to replace' : `${entryFormat === 'video' ? 'MP4, MOV, WebM' : 'MP3, WAV, M4A'}`}
                     </div>
-                    <input ref={fileInputRef} type="file" accept={entryType === 'video' ? 'video/*' : 'audio/*'}
+                    <input ref={fileInputRef} type="file" accept={entryFormat === 'video' ? 'video/*' : 'audio/*'}
                       style={{ display: 'none' }}
                       onChange={e => { if (e.target.files?.[0]) { setUploadedFile(e.target.files[0]); setRecorded(false) } }} />
                   </div>
 
                   <div style={{ textAlign: 'center', fontSize: '11px', color: 'rgba(31,46,35,0.3)', letterSpacing: '.08em' }}>— OR —</div>
 
-                  {entryType === 'video' && showVideoAssist && (
+                  {entryFormat === 'video' && showVideoAssist && (
                     <VideoAssist
-                      entryTitle={title}
+                      entryName={title}
                       recipientName={undefined}
                       onClose={() => setShowVideoAssist(false)}
                     />
@@ -405,23 +410,23 @@ export default function NewEntryPage() {
                     <div onClick={() => { setShowRecorder(true); setUploadedFile(null) }}
                       onMouseEnter={() => setHoveredBtn('record')} onMouseLeave={() => setHoveredBtn(null)}
                       style={{ border: `1px solid ${hoveredBtn === 'record' ? 'rgba(184,155,94,0.4)' : 'rgba(31,46,35,0.12)'}`, borderRadius: '6px', padding: '24px 16px', textAlign: 'center', cursor: 'pointer', background: '#fff', transition: 'all 0.2s ease' }}>
-                      <div style={{ fontSize: '28px', marginBottom: '10px' }}>{entryType === 'video' ? '🎥' : '🎙️'}</div>
-                      <div style={{ fontSize: '13px', color: '#1F2E23', fontWeight: 500, marginBottom: '4px' }}>Record {entryType} now</div>
-                      {entryType === 'video' && !showVideoAssist && (
+                      <div style={{ fontSize: '28px', marginBottom: '10px' }}>{entryFormat === 'video' ? '🎥' : '🎙️'}</div>
+                      <div style={{ fontSize: '13px', color: '#1F2E23', fontWeight: 500, marginBottom: '4px' }}>Record {entryFormat} now</div>
+                      {entryFormat === 'video' && !showVideoAssist && (
                         <div onClick={(e) => { e.stopPropagation(); setShowVideoAssist(true) }}
                           style={{ fontSize: '11px', color: '#B89B5E', marginTop: '6px', cursor: 'pointer', letterSpacing: '.06em' }}>
                           ✨ Give me something to say
                         </div>
                       )}
                       <div style={{ fontSize: '11px', color: 'rgba(31,46,35,0.4)', marginTop: '4px' }}>
-                        Uses your {entryType === 'video' ? 'camera & microphone' : 'microphone'} · 15 sec limit pre-launch
+                        Uses your {entryFormat === 'video' ? 'camera & microphone' : 'microphone'} · 15 sec limit pre-launch
                       </div>
                     </div>
                   )}
 
-                  {showRecorder && !recordedBlob && entryType && (
+                  {showRecorder && !recordedBlob && entryFormat && (
                     <VaultMediaRecorder
-                      type={entryType as 'video' | 'audio'}
+                      type={entryFormat as 'video' | 'audio'}
                       onRecordingComplete={(blob, url) => { setRecordedBlob(blob); setRecordedUrl(url); setRecorded(true); setShowRecorder(false); setUploadedFile(null) }}
                       onCancel={() => setShowRecorder(false)}
                     />
@@ -440,10 +445,10 @@ export default function NewEntryPage() {
                           Re-record
                         </button>
                       </div>
-                      {entryType === 'video' && recordedUrl && (
+                      {entryFormat === 'video' && recordedUrl && (
                         <video src={recordedUrl} controls style={{ width: '100%', borderRadius: '4px', maxHeight: '200px' }} />
                       )}
-                      {entryType === 'audio' && recordedUrl && (
+                      {entryFormat === 'audio' && recordedUrl && (
                         <audio src={recordedUrl} controls style={{ width: '100%' }} />
                       )}
                     </div>
@@ -457,7 +462,7 @@ export default function NewEntryPage() {
           {step === 4 && (
             <div>
               <div style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: isMobile ? '20px' : '22px', fontWeight: 300, color: '#1F2E23', marginBottom: '6px' }}>
-                Review your entry.
+                This is what they will receive.
               </div>
               <div style={{ fontSize: '12px', color: 'rgba(31,46,35,0.4)', marginBottom: '24px' }}>
                 Everything look right? Save it to your vault.
@@ -465,9 +470,9 @@ export default function NewEntryPage() {
 
               <div style={{ background: '#fff', border: '1px solid rgba(31,46,35,0.1)', borderRadius: '6px', overflow: 'hidden' }}>
                 {[
-                  { label: 'Type', value: entryTypes.find(t => t.id === entryType)?.label },
-                  { label: 'Title', value: title },
-                  { label: 'Content', value: entryType === 'text' ? (message.length > 80 ? message.slice(0, 80) + '...' : message) : uploadedFile ? uploadedFile.name : recorded ? 'Browser recording' : '—' },
+                  { label: 'Format', value: entryFormats.find(t => t.id === entryFormat)?.label },
+                  { label: 'Name', value: title },
+                  { label: 'Message', value: entryFormat === 'text' ? (message.length > 80 ? message.slice(0, 80) + '...' : message) : uploadedFile ? uploadedFile.name : recorded ? 'Browser recording' : '—' },
                 ].map((row, i) => (
                   <div key={i} style={{ display: 'flex', padding: '14px 16px', borderBottom: i < 2 ? '1px solid rgba(31,46,35,0.07)' : 'none', gap: '12px' }}>
                     <div style={{ width: '70px', fontSize: '10px', letterSpacing: '.12em', textTransform: 'uppercase', color: 'rgba(31,46,35,0.4)', flexShrink: 0, paddingTop: '1px' }}>{row.label}</div>
@@ -489,7 +494,7 @@ export default function NewEntryPage() {
           )}
 
           {/* NAV BUTTONS */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '32px', paddingTop: '20px', borderTop: '1px solid rgba(31,46,35,0.08)', gap: '12px' }}>
+          <div style={{ display: 'flex', justifyMessage: 'space-between', marginTop: '32px', paddingTop: '20px', borderTop: '1px solid rgba(31,46,35,0.08)', gap: '12px' }}>
             {step > 1 ? (
               <button onClick={() => setStep((step - 1) as Step)}
                 style={{
@@ -531,7 +536,7 @@ export default function NewEntryPage() {
         <div style={{
           position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 100,
           background: '#1F2E23', borderTop: '1px solid rgba(184,155,94,0.15)',
-          display: 'flex', alignItems: 'center', justifyContent: 'space-around',
+          display: 'flex', alignItems: 'center', justifyMessage: 'space-around',
           padding: '8px 0', height: '60px',
         }}>
           {[

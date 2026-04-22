@@ -1,0 +1,637 @@
+'use client'
+
+import { useMemo, useState } from 'react'
+import { useRouter } from 'next/navigation'
+
+function formatFutureDate(days) {
+  const d = new Date()
+  d.setDate(d.getDate() + days)
+  return d.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  })
+}
+
+export default function StartPage() {
+  const router = useRouter()
+
+  const [step, setStep] = useState(1)
+  const [recipientName, setRecipientName] = useState('')
+  const [recipientEmail, setRecipientEmail] = useState('')
+  const [messageType, setMessageType] = useState('text')
+  const [messageText, setMessageText] = useState('')
+  const [deliveryRule, setDeliveryRule] = useState('30_days_inactive')
+  const [errors, setErrors] = useState({})
+
+  const deliveryLabelMap = {
+    '30_days_inactive': "If I don't check in for 30 days",
+    '60_days_inactive': "If I don't check in for 60 days",
+    '90_days_inactive': "If I don't check in for 90 days",
+    'unlock_code': 'Unlock code',
+    'custom_trigger': 'Custom delivery trigger',
+  }
+
+  const deliveryDate = useMemo(() => {
+    if (deliveryRule === '60_days_inactive') return formatFutureDate(60)
+    if (deliveryRule === '90_days_inactive') return formatFutureDate(90)
+    return formatFutureDate(30)
+  }, [deliveryRule])
+
+  const validate = () => {
+    const nextErrors = {}
+
+    if (step === 1) {
+      if (!recipientName.trim()) nextErrors.recipientName = 'Please enter a name.'
+      if (!recipientEmail.trim()) {
+        nextErrors.recipientEmail = 'Please enter an email.'
+      } else if (!/\S+@\S+\.\S+/.test(recipientEmail)) {
+        nextErrors.recipientEmail = 'Please enter a valid email.'
+      }
+    }
+
+    if (step === 2) {
+      if (!messageType) nextErrors.messageType = 'Please choose a message type.'
+      if (messageType === 'text' && !messageText.trim()) {
+        nextErrors.messageText = 'Please enter your message.'
+      }
+    }
+
+    if (step === 3) {
+      if (!deliveryRule) nextErrors.deliveryRule = 'Please choose a delivery trigger.'
+    }
+
+    setErrors(nextErrors)
+    return Object.keys(nextErrors).length === 0
+  }
+
+  const next = () => {
+    if (!validate()) return
+    setErrors({})
+    setStep(step + 1)
+  }
+
+  const back = () => {
+    setErrors({})
+    setStep(step - 1)
+  }
+
+  const finish = () => {
+    localStorage.setItem(
+      'vaultData',
+      JSON.stringify({
+        recipientName,
+        recipientEmail,
+        messageType,
+        messageText,
+        deliveryRule,
+      })
+    )
+    router.push('/sign-up')
+  }
+
+  const page = {
+    minHeight: '100vh',
+    background: '#F5F3EF',
+    padding: '32px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontFamily: '"DM Sans", sans-serif',
+  }
+
+  const shell = {
+    width: 'min(1180px, 100%)',
+    minHeight: '760px',
+    display: 'flex',
+    background: '#FBF8F2',
+    borderRadius: '28px',
+    overflow: 'hidden',
+    boxShadow: '0 24px 60px rgba(33, 43, 37, 0.12)',
+    border: '1px solid rgba(31, 46, 35, 0.08)',
+  }
+
+  const left = {
+    width: '42%',
+    minHeight: '760px',
+    backgroundImage: 'url(/reference/assets/vault-door-reference.jpg)',
+    backgroundSize: 'cover',
+    backgroundPosition: 'center',
+    backgroundRepeat: 'no-repeat',
+  }
+
+  const right = {
+    width: '58%',
+    padding: '42px 48px 38px',
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'space-between',
+    color: '#1F2E23',
+    background: '#FBF8F2',
+  }
+
+  const topRow = {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: '24px',
+  }
+
+  const brand = {
+    fontFamily: '"Cormorant Garamond", serif',
+    fontSize: '22px',
+    letterSpacing: '0.08em',
+    color: '#1F2E23',
+  }
+
+  const dots = {
+    display: 'flex',
+    gap: '8px',
+    alignItems: 'center',
+  }
+
+  const dot = function (active) {
+    return {
+      width: active ? '28px' : '8px',
+      height: '8px',
+      borderRadius: '999px',
+      background: active ? '#B89B5E' : 'rgba(184,155,94,0.25)',
+      transition: 'all 0.2s ease',
+    }
+  }
+
+  const stepKicker = {
+    fontSize: '12px',
+    letterSpacing: '0.18em',
+    textTransform: 'uppercase',
+    color: '#B89B5E',
+    marginBottom: '14px',
+  }
+
+  const title = {
+    fontFamily: '"Cormorant Garamond", serif',
+    fontSize: '48px',
+    lineHeight: 1.02,
+    fontWeight: 500,
+    color: '#1F2E23',
+    marginBottom: '14px',
+  }
+
+  const subtitle = {
+    fontSize: '15px',
+    lineHeight: 1.65,
+    color: 'rgba(31,46,35,0.70)',
+    maxWidth: '520px',
+    marginBottom: '28px',
+  }
+
+  const label = {
+    display: 'block',
+    fontSize: '12px',
+    fontWeight: 600,
+    color: '#1F2E23',
+    marginBottom: '10px',
+  }
+
+  const input = {
+    width: '100%',
+    boxSizing: 'border-box',
+    height: '56px',
+    borderRadius: '16px',
+    border: '1px solid rgba(31,46,35,0.12)',
+    background: '#FFFDF9',
+    padding: '0 18px',
+    fontSize: '15px',
+    color: '#1F2E23',
+    outline: 'none',
+  }
+
+  const textarea = {
+    width: '100%',
+    boxSizing: 'border-box',
+    minHeight: '170px',
+    borderRadius: '20px',
+    border: '1px solid rgba(31,46,35,0.12)',
+    background: '#FFFDF9',
+    padding: '18px',
+    fontSize: '15px',
+    color: '#1F2E23',
+    outline: 'none',
+    resize: 'vertical',
+    lineHeight: 1.6,
+  }
+
+  const error = {
+    marginTop: '8px',
+    fontSize: '12px',
+    color: '#A14444',
+  }
+
+  const infoBox = {
+    background: '#FFF8EA',
+    border: '1px solid rgba(184,155,94,0.28)',
+    borderRadius: '18px',
+    padding: '16px 18px',
+    fontSize: '14px',
+    lineHeight: 1.6,
+    color: 'rgba(31,46,35,0.82)',
+    marginBottom: '20px',
+  }
+
+  const messageGrid = {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(3, 1fr)',
+    gap: '14px',
+    marginBottom: '22px',
+  }
+
+  const messageCard = function (selected) {
+    return {
+      borderRadius: '20px',
+      padding: '14px',
+      background: selected ? '#F3EBDD' : '#FFFDF9',
+      border: selected
+        ? '1px solid rgba(184,155,94,0.65)'
+        : '1px solid rgba(31,46,35,0.10)',
+      boxShadow: selected ? '0 14px 30px rgba(184,155,94,0.14)' : 'none',
+      cursor: 'pointer',
+    }
+  }
+
+  const thumb = {
+    height: '96px',
+    borderRadius: '14px',
+    background: 'linear-gradient(180deg, #314034 0%, #182019 100%)',
+    marginBottom: '12px',
+  }
+
+  const messageCardTitle = {
+    fontFamily: '"Cormorant Garamond", serif',
+    fontSize: '24px',
+    color: '#1F2E23',
+    marginBottom: '4px',
+  }
+
+  const comingSoon = {
+    fontSize: '12px',
+    color: 'rgba(31,46,35,0.55)',
+  }
+
+  const optionList = {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '12px',
+  }
+
+  const optionRow = function (selected) {
+    return {
+      display: 'flex',
+      alignItems: 'center',
+      gap: '14px',
+      borderRadius: '18px',
+      padding: '17px 18px',
+      background: selected ? '#FFF8EA' : '#FFFDF9',
+      border: selected
+        ? '1px solid rgba(184,155,94,0.60)'
+        : '1px solid rgba(31,46,35,0.10)',
+      cursor: 'pointer',
+    }
+  }
+
+  const radioOuter = function (selected) {
+    return {
+      width: '18px',
+      height: '18px',
+      borderRadius: '999px',
+      border: selected ? '1px solid #B89B5E' : '1px solid rgba(31,46,35,0.22)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      flexShrink: 0,
+      background: '#fff',
+    }
+  }
+
+  const radioInner = function (selected) {
+    return {
+      width: '8px',
+      height: '8px',
+      borderRadius: '999px',
+      background: selected ? '#B89B5E' : 'transparent',
+    }
+  }
+
+  const previewGrid = {
+    display: 'grid',
+    gridTemplateColumns: '1fr 1fr',
+    gap: '18px',
+    marginTop: '4px',
+    marginBottom: '18px',
+  }
+
+  const liftedCard = {
+    borderRadius: '22px',
+    background: '#FFFDF9',
+    border: '1px solid rgba(31,46,35,0.08)',
+    boxShadow: '0 14px 36px rgba(31,46,35,0.08)',
+    padding: '22px',
+  }
+
+  const buttonRow = {
+    marginTop: '28px',
+    display: 'flex',
+    gap: '12px',
+    alignItems: 'center',
+  }
+
+  const backButton = {
+    border: 'none',
+    background: 'transparent',
+    color: '#1F2E23',
+    fontSize: '13px',
+    letterSpacing: '0.08em',
+    textTransform: 'uppercase',
+    cursor: 'pointer',
+    padding: '0',
+  }
+
+  const continueButton = {
+    width: '100%',
+    height: '58px',
+    borderRadius: '18px',
+    border: 'none',
+    background: '#1F2E23',
+    color: '#D8BF86',
+    fontSize: '13px',
+    fontWeight: 700,
+    letterSpacing: '0.16em',
+    textTransform: 'uppercase',
+    cursor: 'pointer',
+    boxShadow: '0 12px 26px rgba(31,46,35,0.18)',
+  }
+
+  const goldButton = {
+    width: '100%',
+    height: '58px',
+    borderRadius: '18px',
+    border: 'none',
+    background: '#B89B5E',
+    color: '#1F2E23',
+    fontSize: '13px',
+    fontWeight: 700,
+    letterSpacing: '0.16em',
+    textTransform: 'uppercase',
+    cursor: 'pointer',
+    boxShadow: '0 12px 26px rgba(184,155,94,0.25)',
+  }
+
+  function renderStep1() {
+    return (
+      <>
+        <div style={stepKicker}>Step 1 of 4</div>
+        <div style={title}>Who should receive this vault entry?</div>
+        <div style={subtitle}>
+          Add the person who will receive this when it&apos;s delivered.
+        </div>
+
+        <div style={{ marginBottom: '18px' }}>
+          <label style={label}>Recipient name</label>
+          <input
+            style={input}
+            value={recipientName}
+            onChange={(e) => setRecipientName(e.target.value)}
+            placeholder="Enter their name"
+          />
+          {errors.recipientName ? <div style={error}>{errors.recipientName}</div> : null}
+        </div>
+
+        <div style={{ marginBottom: '10px' }}>
+          <label style={label}>Recipient email</label>
+          <input
+            style={input}
+            value={recipientEmail}
+            onChange={(e) => setRecipientEmail(e.target.value)}
+            placeholder="Enter their email"
+          />
+          {errors.recipientEmail ? <div style={error}>{errors.recipientEmail}</div> : null}
+        </div>
+
+        <div style={buttonRow}>
+          <button style={continueButton} onClick={next}>Continue →</button>
+        </div>
+      </>
+    )
+  }
+
+  function renderStep2() {
+    return (
+      <>
+        <div style={stepKicker}>Step 2 of 4</div>
+        <div style={title}>What kind of message would you like to deliver?</div>
+        <div style={subtitle}>
+          Choose the format for this vault entry. You can keep it written for now and add richer formats later.
+        </div>
+
+        <div style={messageGrid}>
+          <div style={messageCard(messageType === 'text')} onClick={() => setMessageType('text')}>
+            <div style={thumb}></div>
+            <div style={messageCardTitle}>Text</div>
+            <div style={comingSoon}>Ready now</div>
+          </div>
+
+          <div style={messageCard(messageType === 'audio')} onClick={() => setMessageType('audio')}>
+            <div style={thumb}></div>
+            <div style={messageCardTitle}>Audio</div>
+            <div style={comingSoon}>Coming soon</div>
+          </div>
+
+          <div style={messageCard(messageType === 'video')} onClick={() => setMessageType('video')}>
+            <div style={thumb}></div>
+            <div style={messageCardTitle}>Video</div>
+            <div style={comingSoon}>Coming soon</div>
+          </div>
+        </div>
+
+        {errors.messageType ? <div style={{ ...error, marginBottom: '10px' }}>{errors.messageType}</div> : null}
+
+        {messageType === 'text' ? (
+          <div>
+            <label style={label}>Your message</label>
+            <textarea
+              style={textarea}
+              value={messageText}
+              onChange={(e) => setMessageText(e.target.value)}
+              placeholder="Write your message here..."
+            />
+            {errors.messageText ? <div style={error}>{errors.messageText}</div> : null}
+          </div>
+        ) : (
+          <div style={infoBox}>
+            {messageType === 'audio' ? 'Audio recording support coming next.' : 'Video recording support coming next.'}
+          </div>
+        )}
+
+        <div style={buttonRow}>
+          <button style={backButton} onClick={back}>← Back</button>
+          <div style={{ flex: 1 }}>
+            <button style={continueButton} onClick={next}>Continue →</button>
+          </div>
+        </div>
+      </>
+    )
+  }
+
+  function renderStep3() {
+    const options = [
+      { id: '30_days_inactive', label: "If I don't check in for 30 days" },
+      { id: '60_days_inactive', label: "If I don't check in for 60 days" },
+      { id: '90_days_inactive', label: "If I don't check in for 90 days" },
+      { id: 'unlock_code', label: 'Unlock code' },
+      { id: 'custom_trigger', label: 'Custom delivery trigger' },
+    ]
+
+    return (
+      <>
+        <div style={stepKicker}>Step 3 of 4</div>
+        <div style={title}>When should this be delivered?</div>
+        <div style={infoBox}>
+          All delivery triggers are fully automated. You set the trigger and the number of missed check-ins.
+        </div>
+
+        <div style={optionList}>
+          {options.map((option) => (
+            <div
+              key={option.id}
+              style={optionRow(deliveryRule === option.id)}
+              onClick={() => setDeliveryRule(option.id)}
+            >
+              <div style={radioOuter(deliveryRule === option.id)}>
+                <div style={radioInner(deliveryRule === option.id)} />
+              </div>
+              <div style={{ fontSize: '15px', color: '#1F2E23' }}>{option.label}</div>
+            </div>
+          ))}
+        </div>
+
+        {errors.deliveryRule ? <div style={error}>{errors.deliveryRule}</div> : null}
+
+        <div style={buttonRow}>
+          <button style={backButton} onClick={back}>← Back</button>
+          <div style={{ flex: 1 }}>
+            <button style={continueButton} onClick={next}>Continue →</button>
+          </div>
+        </div>
+      </>
+    )
+  }
+
+  function renderStep4() {
+    return (
+      <>
+        <div style={stepKicker}>Step 4 of 4</div>
+        <div style={title}>Simulated Delivery</div>
+        <div style={subtitle}>Here&apos;s how this will be delivered.</div>
+
+        <div style={previewGrid}>
+          <div style={liftedCard}>
+            <div style={{
+              fontSize: '12px',
+              letterSpacing: '0.14em',
+              textTransform: 'uppercase',
+              color: '#B89B5E',
+              marginBottom: '14px',
+            }}>
+              Delivery Card
+            </div>
+
+            <div style={{
+              borderRadius: '18px',
+              padding: '22px',
+              background: '#FFF8EA',
+              border: '1px solid rgba(184,155,94,0.28)',
+            }}>
+              <div style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '30px', marginBottom: '14px' }}>
+                Vault Entry
+              </div>
+              <div style={{ fontSize: '14px', lineHeight: 1.8, color: 'rgba(31,46,35,0.82)' }}>
+                <div><strong>To:</strong> {recipientName || 'Recipient'}</div>
+                <div><strong>From:</strong> You</div>
+                <div><strong>Trigger:</strong> {deliveryLabelMap[deliveryRule]}</div>
+                <div><strong>Estimated delivery:</strong> {deliveryDate}</div>
+              </div>
+            </div>
+          </div>
+
+          <div style={liftedCard}>
+            <div style={{
+              fontSize: '12px',
+              letterSpacing: '0.14em',
+              textTransform: 'uppercase',
+              color: '#B89B5E',
+              marginBottom: '14px',
+            }}>
+              Message Preview
+            </div>
+
+            <div style={{
+              borderRadius: '18px',
+              minHeight: '230px',
+              padding: '22px',
+              background: '#FFFDF9',
+              border: '1px solid rgba(31,46,35,0.08)',
+              lineHeight: 1.8,
+              color: '#1F2E23',
+              whiteSpace: 'pre-wrap',
+            }}>
+              {messageText || 'Your message will appear here.'}
+            </div>
+          </div>
+        </div>
+
+        <div style={{
+          textAlign: 'center',
+          fontFamily: '"Cormorant Garamond", serif',
+          fontStyle: 'italic',
+          fontSize: '28px',
+          color: 'rgba(31,46,35,0.78)',
+          marginBottom: '18px',
+        }}>
+          This is what they would receive.
+        </div>
+
+        <div style={buttonRow}>
+          <button style={backButton} onClick={back}>← Back</button>
+          <div style={{ flex: 1 }}>
+            <button style={goldButton} onClick={finish}>Make This Real →</button>
+          </div>
+        </div>
+      </>
+    )
+  }
+
+  return (
+    <div style={page}>
+      <div style={shell}>
+        <div style={left}></div>
+
+        <div style={right}>
+          <div>
+            <div style={topRow}>
+              <div style={brand}>Legacy Vault</div>
+              <div style={dots}>
+                {[1, 2, 3, 4].map((n) => (
+                  <div key={n} style={dot(n <= step)} />
+                ))}
+              </div>
+            </div>
+
+            {step === 1 ? renderStep1() : null}
+            {step === 2 ? renderStep2() : null}
+            {step === 3 ? renderStep3() : null}
+            {step === 4 ? renderStep4() : null}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}

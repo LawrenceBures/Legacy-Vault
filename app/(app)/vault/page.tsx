@@ -1,6 +1,6 @@
 'use client'
 
-import { useUser, UserButton, useAuth } from '@clerk/nextjs'
+import { useUser, UserButton, useAuth, SignOutButton } from '@clerk/nextjs'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState, useCallback } from 'react'
 import { createSupabaseClient } from '@/lib/supabase-auth'
@@ -155,12 +155,32 @@ export default function VaultPage() {
         ))}
 
         <div style={{
-          marginTop: 'auto', paddingBottom: '8px',
-          paddingLeft: sidebarOpen ? '20px' : '0', width: '100%',
-          display: 'flex', justifyContent: sidebarOpen ? 'flex-start' : 'center',
+          marginTop: 'auto',
+          paddingBottom: '8px',
+          paddingLeft: sidebarOpen ? '20px' : '0',
+          width: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: sidebarOpen ? 'flex-start' : 'center',
+          justifyContent: sidebarOpen ? 'flex-start' : 'center',
+          gap: '10px',
           transition: 'all 0.25s ease',
         }}>
           <UserButton />
+          <SignOutButton>
+            <button style={{
+              background: 'transparent',
+              border: 'none',
+              color: 'rgba(245,243,239,0.45)',
+              fontSize: '10px',
+              letterSpacing: '.12em',
+              textTransform: 'uppercase',
+              cursor: 'pointer',
+              padding: 0,
+            }}>
+              {sidebarOpen ? 'Sign out' : '↩'}
+            </button>
+          </SignOutButton>
         </div>
       </aside>
 
@@ -181,7 +201,7 @@ export default function VaultPage() {
             </div>
             {!isMobile && (
               <div style={{ fontSize: '13px', color: 'rgba(31,46,35,0.45)', fontFamily: 'Cormorant Garamond, serif', fontStyle: 'italic' }}>
-                Everything you leave behind, kept safe until the moment it matters.
+                What you leave behind — organized, protected, and delivered with intention.
               </div>
             )}
           </div>
@@ -311,10 +331,10 @@ export default function VaultPage() {
                 🔒
               </div>
               <div style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '26px', fontWeight: 300, color: '#1F2E23', marginBottom: '10px' }}>
-                Your vault is empty.
+                Your vault is waiting.
               </div>
               <div style={{ fontSize: '13px', color: 'rgba(31,46,35,0.45)', lineHeight: 1.7, marginBottom: '32px', fontFamily: 'Cormorant Garamond, serif', fontStyle: 'italic' }}>
-                This is where your voice lives on. Add a video message, a letter, or an audio recording — for the people who matter most.
+                This is where your voice, your guidance, and your intent begin to take shape. Start with one message for one person who matters.
               </div>
               <a href="/new-entry"
                 style={{
