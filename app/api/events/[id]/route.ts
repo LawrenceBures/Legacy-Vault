@@ -146,7 +146,7 @@ export async function PATCH(
     const { data: updated, error: updateError } = await supabase
       .from("event_vaults")
       .update(updates)
-      .eq("id", params.id)
+      .eq("id", id)
       .select()
       .single();
 
@@ -200,7 +200,7 @@ export async function DELETE(
     const { error: deleteError } = await supabase
       .from("event_vaults")
       .delete()
-      .eq("id", params.id);
+      .eq("id", id);
 
     if (deleteError) {
       return NextResponse.json({ error: "Failed to delete event" }, { status: 500 });

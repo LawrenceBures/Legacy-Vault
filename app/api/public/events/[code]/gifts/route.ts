@@ -3,21 +3,22 @@ import { createClient } from "@/lib/supabase/server";
 import Stripe from "stripe";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2024-06-20",
+  apiVersion: "2026-03-25.dahlia",
 });
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: { code: string } }
+  { params }: { params: Promise<{ code: string }> }
 ) {
   try {
     const supabase = createClient();
+    const { code } = await params;
 
     // Fetch event
     const { data: event, error: eventError } = await supabase
       .from("event_vaults")
       .select("id, status, allow_gifts, stripe_account_id, platform_fee_percent, event_name")
-      .eq("short_code", params.code)
+      .eq("short_code", code)
       .single();
 
     if (eventError || !event) {
@@ -58,7 +59,7 @@ export async function POST(
       },
       metadata: {
         event_name: event.event_name,
-        short_code: params.code,
+        short_code: code,
         submission_id: submission_id || "",
       },
     });

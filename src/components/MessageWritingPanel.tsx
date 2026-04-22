@@ -214,7 +214,6 @@ const styles: Record<string, React.CSSProperties> = {
 
   textarea: {
     width: '100%',
-    minHeight: '220px',
     padding: '20px 24px',
     background: 'transparent',
     border: 'none',

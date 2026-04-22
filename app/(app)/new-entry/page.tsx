@@ -198,7 +198,7 @@ if (!isLoaded || !user) return null
             style={{
               width: sidebarOpen ? 'calc(100% - 16px)' : '40px', height: '40px',
               display: 'flex', alignItems: 'center',
-              justifyMessage: sidebarOpen ? 'flex-start' : 'center',
+              justifyContent: sidebarOpen ? 'flex-start' : 'center',
               gap: '10px', borderRadius: '12px',
               color: item.active ? '#B89B5E' : hoveredNav === i ? '#F5F3EF' : 'rgba(245,243,239,0.35)',
               background: item.active ? 'rgba(184,155,94,0.15)' : hoveredNav === i ? 'rgba(245,243,239,0.06)' : 'transparent',
@@ -216,7 +216,7 @@ if (!isLoaded || !user) return null
         <div style={{
           marginTop: 'auto', paddingBottom: '8px',
           paddingLeft: sidebarOpen ? '20px' : '0', width: '100%',
-          display: 'flex', justifyMessage: sidebarOpen ? 'flex-start' : 'center',
+          display: 'flex', justifyContent: sidebarOpen ? 'flex-start' : 'center',
           transition: 'all 0.25s ease',
         }}>
           <UserButton />
@@ -255,7 +255,7 @@ if (!isLoaded || !user) return null
                   width: '26px', height: '26px', borderRadius: '50%',
                   background: step === s.num ? '#1F2E23' : step > s.num ? '#C2A468' : 'rgba(31,46,35,0.08)',
                   color: step === s.num ? '#C2A468' : step > s.num ? '#1F2E23' : 'rgba(31,46,35,0.3)',
-                  display: 'flex', alignItems: 'center', justifyMessage: 'center',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
                   fontSize: '11px', fontWeight: 600, flexShrink: 0, transition: 'all 0.22s ease',
                 }}>
                   {step > s.num ? '✓' : s.num}
@@ -310,7 +310,7 @@ if (!isLoaded || !user) return null
                       border: `2px solid ${entryFormat === type.id ? '#B89B5E' : 'rgba(31,46,35,0.2)'}`,
                       background: entryFormat === type.id ? '#B89B5E' : 'transparent',
                       flexShrink: 0, transition: 'all 0.18s ease',
-                      display: 'flex', alignItems: 'center', justifyMessage: 'center',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
                     }}>
                       {entryFormat === type.id && <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#fff' }} />}
                     </div>
@@ -368,7 +368,7 @@ if (!isLoaded || !user) return null
                     <AIWritingAssistant
                       onUseMessage={(text) => setMessage(text)}
                       recipientName={undefined}
-                      entryName={title}
+                      entryTitle={title}
                     />
                   </div>
                 </div>
@@ -400,7 +400,7 @@ if (!isLoaded || !user) return null
 
                   {entryFormat === 'video' && showVideoAssist && (
                     <VideoAssist
-                      entryName={title}
+                      entryTitle={title}
                       recipientName={undefined}
                       onClose={() => setShowVideoAssist(false)}
                     />
@@ -494,7 +494,7 @@ if (!isLoaded || !user) return null
           )}
 
           {/* NAV BUTTONS */}
-          <div style={{ display: 'flex', justifyMessage: 'space-between', marginTop: '32px', paddingTop: '20px', borderTop: '1px solid rgba(31,46,35,0.08)', gap: '12px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '32px', paddingTop: '20px', borderTop: '1px solid rgba(31,46,35,0.08)', gap: '12px' }}>
             {step > 1 ? (
               <button onClick={() => setStep((step - 1) as Step)}
                 style={{
@@ -536,7 +536,7 @@ if (!isLoaded || !user) return null
         <div style={{
           position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 100,
           background: '#1F2E23', borderTop: '1px solid rgba(184,155,94,0.15)',
-          display: 'flex', alignItems: 'center', justifyMessage: 'space-around',
+          display: 'flex', alignItems: 'center', justifyContent: 'space-around',
           padding: '8px 0', height: '60px',
         }}>
           {[
