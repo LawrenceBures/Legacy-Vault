@@ -142,7 +142,7 @@ export default function StartPage() {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    padding: '30px',
+    padding: '18px',
     fontFamily: '"DM Sans", sans-serif',
   }
 
@@ -237,7 +237,7 @@ export default function StartPage() {
     letterSpacing: '0.18em',
     textTransform: 'uppercase',
     color: '#A8792B',
-    marginBottom: '18px',
+    marginBottom: '14px',
   }
 
   const title = {
@@ -245,14 +245,14 @@ export default function StartPage() {
     fontSize: "48px",
     lineHeight: '0.98',
     color: '#173A2C',
-    marginBottom: '18px',
+    marginBottom: '14px',
     maxWidth: '720px',
   }
 
   const divider = {
     width: '190px',
     height: '16px',
-    marginBottom: '24px',
+    marginBottom: '14px',
     display: 'flex',
     alignItems: 'center',
     gap: '8px',
@@ -295,7 +295,7 @@ export default function StartPage() {
 
   const inputWrap = {
     position: 'relative',
-    marginBottom: '24px',
+    marginBottom: '14px',
   }
 
   const icon = {
@@ -303,7 +303,7 @@ export default function StartPage() {
     left: '22px',
     top: '50%',
     transform: 'translateY(-50%)',
-    fontSize: '28px',
+    fontSize: '21px',
     color: '#B89B5E',
     pointerEvents: 'none',
   }
@@ -348,7 +348,7 @@ export default function StartPage() {
     display: 'grid',
     gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
     gap: '18px',
-    marginBottom: '26px',
+    marginBottom: '14px',
   }
 
   const messageCard = function (selected) {
@@ -422,7 +422,7 @@ export default function StartPage() {
   const optionList = {
     display: 'flex',
     flexDirection: 'column',
-    gap: '14px',
+    gap: '10px',
     marginBottom: '28px',
   }
 
@@ -464,7 +464,7 @@ export default function StartPage() {
   }
 
   const optionIcon = {
-    fontSize: '30px',
+    fontSize: '21px',
     width: '36px',
     textAlign: 'center',
     color: '#A8792B',
@@ -601,7 +601,7 @@ export default function StartPage() {
 
   const previewMessage = {
     fontFamily: '"Cormorant Garamond", serif',
-    fontSize: '28px',
+    fontSize: '21px',
     lineHeight: '1.75',
     color: '#173A2C',
     whiteSpace: 'pre-wrap',
@@ -611,7 +611,7 @@ export default function StartPage() {
     textAlign: 'center',
     fontFamily: '"Cormorant Garamond", serif',
     fontStyle: 'italic',
-    fontSize: '30px',
+    fontSize: '21px',
     color: 'rgba(31,46,35,0.84)',
     marginBottom: '20px',
   }
@@ -739,7 +739,7 @@ export default function StartPage() {
         <div style={stepLabel}>Step 2 of 4</div>
         <div style={title}>What kind of message would you like to deliver?</div>
         {renderDivider()}
-        <div style={{ ...subtitle, fontSize: '25px', marginBottom: '24px' }}>
+        <div style={{ ...subtitle, fontSize: '25px', marginBottom: '14px' }}>
           Choose the format for your vault entry.
         </div>
 
@@ -843,298 +843,181 @@ export default function StartPage() {
       messageText ||
       'This is where your message will appear.\n\nThis is an example of how it will look when delivered.\n\n— You'
 
-    const jumpText =
-      deliveryRule === '60_days_inactive'
-        ? '60 days later...'
-        : deliveryRule === '90_days_inactive'
-        ? '90 days later...'
-        : deliveryRule === 'unlock_code'
-        ? 'Unlock triggered...'
-        : deliveryRule === 'custom_trigger'
-        ? 'Trigger condition met...'
-        : '30 days later...'
-
     return (
       <>
         <div style={stepLabel}>Step 4 of 4</div>
         <div style={title}>Simulated Delivery</div>
         {renderDivider()}
-        <div style={{ ...subtitle, fontSize: '25px', marginBottom: '24px' }}>
+        <div style={{ ...subtitle, fontSize: '25px', marginBottom: '28px' }}>
           Here&apos;s how this will be delivered.
         </div>
 
         <div style={{
-          position: 'relative',
-          minHeight: '470px',
-          borderRadius: '24px',
-          background: '#F6F1E8',
-          border: '1px solid rgba(184,155,94,0.18)',
-          boxShadow: '0 12px 32px rgba(31,46,35,0.08)',
-          overflow: 'hidden',
+          display: 'grid',
+          gridTemplateColumns: '1fr 1fr',
+          gap: '10px',
           marginBottom: '22px',
         }}>
           <div style={{
-            position: 'absolute',
-            inset: 0,
-            background: 'rgba(22, 39, 31, 0.26)',
-            opacity: step4Phase >= 1 ? 1 : 0,
-            transition: 'opacity 0.35s ease',
-            pointerEvents: 'none',
-            zIndex: 1,
-          }} />
-
-          <div style={{
-            position: 'absolute',
-            inset: 0,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            opacity: step4Phase === 1 ? 1 : 0,
-            transform: step4Phase === 1 ? 'scale(1)' : 'scale(0.96)',
-            filter: step4Phase >= 2 ? 'blur(14px)' : 'blur(0px)',
-            transition: 'opacity 0.35s ease, transform 0.45s ease, filter 0.45s ease',
-            zIndex: 2,
-            pointerEvents: 'none',
+            borderRadius: '18px',
+            background: '#FBF8F2',
+            border: '1px solid rgba(184,155,94,0.20)',
+            boxShadow: '0 14px 34px rgba(31,46,35,0.06)',
+            padding: '18px',
+            minHeight: '210px',
           }}>
             <div style={{
-              fontFamily: '"Cormorant Garamond", serif',
-              fontSize: '64px',
-              fontStyle: 'italic',
-              color: '#FFF8EA',
-              textShadow: '0 8px 28px rgba(0,0,0,0.26)',
+              fontSize: '13px',
+              fontWeight: 700,
+              letterSpacing: '0.14em',
+              textTransform: 'uppercase',
+              color: '#A8792B',
+              marginBottom: '14px',
             }}>
-              {jumpText}
+              Delivery Card
+            </div>
+
+            <div style={{
+              borderRadius: '16px',
+              background: 'linear-gradient(180deg, #FFF8EA 0%, #F8EED9 100%)',
+              border: '1px solid rgba(184,155,94,0.24)',
+              padding: '16px 14px',
+              marginBottom: '14px',
+              boxShadow: '0 10px 24px rgba(31,46,35,0.05)',
+            }}>
+              <div style={{
+                fontSize: '11px',
+                fontWeight: 700,
+                letterSpacing: '0.14em',
+                textTransform: 'uppercase',
+                color: 'rgba(31,46,35,0.42)',
+                marginBottom: '10px',
+              }}>
+                To
+              </div>
+              <div style={{
+                fontFamily: '"Cormorant Garamond", serif',
+                fontSize: '21px',
+                color: '#173A2C',
+                lineHeight: 1.1,
+                marginBottom: '14px',
+              }}>
+                {recipientName || 'Sarah Johnson'}
+              </div>
+
+              <div style={{
+                width: '64px',
+                height: '2px',
+                background: '#B89B5E',
+                marginBottom: '14px',
+              }} />
+
+              <div style={{
+                display: 'grid',
+                gap: '10px',
+                fontSize: '15px',
+                color: 'rgba(31,46,35,0.70)',
+                lineHeight: 1.6,
+              }}>
+                <div><strong style={{ color: '#173A2C' }}>From:</strong> You</div>
+                <div><strong style={{ color: '#173A2C' }}>Delivery date:</strong> {deliveryDate}</div>
+              </div>
+            </div>
+
+            <div style={{
+              borderRadius: '14px',
+              background: 'rgba(184,155,94,0.10)',
+              border: '1px solid rgba(184,155,94,0.18)',
+              padding: '16px 18px',
+              marginBottom: '14px',
+            }}>
+              <div style={{
+                fontSize: '11px',
+                fontWeight: 700,
+                letterSpacing: '0.14em',
+                textTransform: 'uppercase',
+                color: '#A8792B',
+                marginBottom: '8px',
+              }}>
+                Delivery Trigger
+              </div>
+              <div style={{
+                fontSize: '16px',
+                fontWeight: 600,
+                color: '#173A2C',
+                lineHeight: 1.5,
+              }}>
+                {deliveryLabelMap[deliveryRule]}
+              </div>
+            </div>
+
+            <div style={{
+              fontSize: '14px',
+              color: 'rgba(31,46,35,0.62)',
+              lineHeight: 1.6,
+            }}>
+              This delivery will happen automatically based on the trigger you selected.
             </div>
           </div>
 
           <div style={{
-            position: 'absolute',
-            inset: 0,
-            opacity: step4Phase >= 2 ? 1 : 0,
-            transform: step4Phase >= 2 ? 'scale(1)' : 'scale(0.985)',
-            filter: step4Phase >= 2 ? 'blur(0px)' : 'blur(10px)',
-            transition: 'opacity 0.55s ease, transform 0.55s ease, filter 0.55s ease',
-            zIndex: 3,
+            borderRadius: '18px',
+            background: '#FBF8F2',
+            border: '1px solid rgba(184,155,94,0.20)',
+            boxShadow: '0 14px 34px rgba(31,46,35,0.06)',
+            padding: '18px',
+            minHeight: '210px',
           }}>
             <div style={{
-              display: 'grid',
-              gridTemplateColumns: '1fr 1fr',
-              gap: '18px',
-              padding: '24px',
-              minHeight: '100%',
+              fontSize: '13px',
+              fontWeight: 700,
+              letterSpacing: '0.14em',
+              textTransform: 'uppercase',
+              color: '#A8792B',
+              marginBottom: '14px',
+            }}>
+              Message Preview
+            </div>
+
+            <div style={{
+              borderRadius: '16px',
+              border: '1px solid rgba(184,155,94,0.16)',
+              background: '#FFFCF7',
+              minHeight: '210px',
+              padding: '18px 16px',
               boxSizing: 'border-box',
             }}>
               <div style={{
-                borderRadius: '18px',
-                background: '#FBF8F2',
-                border: '1px solid rgba(184,155,94,0.18)',
-                boxShadow: '0 12px 32px rgba(31,46,35,0.08)',
-                padding: '24px',
-                minHeight: '392px',
-                transform: step4Phase >= 2 ? 'translateY(0)' : 'translateY(14px)',
-                transition: 'transform 0.55s ease',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '18px',
               }}>
                 <div style={{
                   fontSize: '13px',
-                  fontWeight: 700,
-                  letterSpacing: '0.14em',
+                  letterSpacing: '0.12em',
                   textTransform: 'uppercase',
-                  color: '#A8792B',
-                  textAlign: 'center',
-                  marginBottom: '16px',
+                  color: 'rgba(31,46,35,0.45)',
                 }}>
-                  Delivery Card
-                </div>
-
-                <div style={{
-                  display: 'flex',
-                  justifyContent: 'center',
-                  marginBottom: '22px',
-                }}>
-                  <div style={{
-                    position: 'relative',
-                    width: '262px',
-                    height: '170px',
-                  }}>
-                    <div style={{
-                      position: 'absolute',
-                      left: 0,
-                      right: 0,
-                      bottom: 0,
-                      height: '96px',
-                      borderRadius: '0 0 16px 16px',
-                      background: '#E9D7B7',
-                      border: '1px solid rgba(184,155,94,0.34)',
-                      overflow: 'hidden',
-                    }}>
-                      <div style={{
-                        position: 'absolute',
-                        left: 0,
-                        bottom: 0,
-                        width: 0,
-                        height: 0,
-                        borderTop: '48px solid transparent',
-                        borderBottom: '48px solid #173A2C',
-                        borderRight: '131px solid transparent',
-                      }} />
-                      <div style={{
-                        position: 'absolute',
-                        right: 0,
-                        bottom: 0,
-                        width: 0,
-                        height: 0,
-                        borderTop: '48px solid transparent',
-                        borderBottom: '48px solid #214636',
-                        borderLeft: '131px solid transparent',
-                      }} />
-                    </div>
-
-                    <div style={{
-                      position: 'absolute',
-                      left: '50%',
-                      top: step4Phase >= 3 ? '-6px' : '30px',
-                      transform: 'translateX(-50%)',
-                      width: '226px',
-                      minHeight: '132px',
-                      borderRadius: '14px',
-                      background: 'linear-gradient(180deg, #FFF8EA 0%, #F5E8C9 100%)',
-                      border: '1px solid rgba(184,155,94,0.25)',
-                      boxShadow: step4Phase >= 3 ? '0 14px 28px rgba(31,46,35,0.12)' : 'none',
-                      padding: '18px 16px 14px',
-                      boxSizing: 'border-box',
-                      zIndex: 2,
-                      transition: 'top 0.7s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.7s ease',
-                    }}>
-                      <div style={{
-                        fontFamily: '"Cormorant Garamond", serif',
-                        fontSize: '24px',
-                        color: '#173A2C',
-                        textAlign: 'center',
-                        marginBottom: '6px',
-                      }}>
-                        {recipientName || 'Sarah Johnson'}
-                      </div>
-
-                      <div style={{
-                        width: '52px',
-                        height: '2px',
-                        background: '#B89B5E',
-                        margin: '0 auto 8px',
-                      }} />
-
-                      <div style={{
-                        fontFamily: '"Cormorant Garamond", serif',
-                        fontSize: '17px',
-                        lineHeight: '1.45',
-                        color: 'rgba(31,46,35,0.82)',
-                        textAlign: 'center',
-                      }}>
-                        From: You<br />
-                        Delivered on<br />
-                        {deliveryDate}
-                      </div>
-                    </div>
-
-                    <div style={{
-                      position: 'absolute',
-                      left: '50%',
-                      top: '44px',
-                      transform: 'translateX(-50%)',
-                      width: 0,
-                      height: 0,
-                      borderLeft: '131px solid transparent',
-                      borderRight: '131px solid transparent',
-                      borderTop: step4Phase >= 3 ? '22px solid #EFE1C3' : '88px solid #EFE1C3',
-                      zIndex: 3,
-                      transition: 'border-top 0.6s cubic-bezier(0.22, 1, 0.36, 1)',
-                    }} />
-
-                    <div style={{
-                      position: 'absolute',
-                      left: '50%',
-                      top: '106px',
-                      transform: 'translateX(-50%)',
-                      width: '44px',
-                      height: '44px',
-                      borderRadius: '999px',
-                      background: '#C69243',
-                      boxShadow: '0 6px 12px rgba(0,0,0,0.16)',
-                      zIndex: 4,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      color: '#173A2C',
-                      fontSize: '18px',
-                      fontWeight: 700,
-                    }}>
-                      ✦
-                    </div>
-                  </div>
+                  Delivered Message
                 </div>
 
                 <div style={{
                   fontFamily: '"Cormorant Garamond", serif',
-                  fontSize: '22px',
+                  fontSize: '21px',
                   lineHeight: '1.75',
                   color: '#173A2C',
+                  whiteSpace: 'pre-wrap',
+                  fontStyle: 'italic',
                 }}>
-                  <div><strong>To:</strong> {recipientName || 'Sarah Johnson'}</div>
-                  <div><strong>From:</strong> You</div>
-                  <div><strong>Trigger:</strong> {deliveryLabelMap[deliveryRule]}</div>
-                  <div><strong>Estimated delivery:</strong> {deliveryDate}</div>
-                </div>
-              </div>
-
-              <div style={{
-                borderRadius: '18px',
-                background: '#FBF8F2',
-                border: '1px solid rgba(184,155,94,0.18)',
-                boxShadow: '0 12px 32px rgba(31,46,35,0.08)',
-                padding: '24px',
-                minHeight: '392px',
-                transform: step4Phase >= 3 ? 'translateY(0)' : 'translateY(16px)',
-                opacity: step4Phase >= 3 ? 1 : 0.75,
-                transition: 'transform 0.6s ease, opacity 0.6s ease',
-              }}>
-                <div style={{
-                  fontSize: '13px',
-                  fontWeight: 700,
-                  letterSpacing: '0.14em',
-                  textTransform: 'uppercase',
-                  color: '#A8792B',
-                  textAlign: 'center',
-                  marginBottom: '16px',
-                }}>
-                  Message Preview
+                  {messagePreview}
                 </div>
 
                 <div style={{
-                  minHeight: '286px',
-                  borderRadius: '12px',
-                  padding: '8px 4px 0',
-                  position: 'relative',
-                  overflow: 'hidden',
+                  fontSize: '14px',
+                  color: 'rgba(31,46,35,0.5)',
+                  marginTop: '10px',
                 }}>
-                  <div style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: step4Phase >= 3 ? '110%' : '-45%',
-                    width: '38%',
-                    height: '100%',
-                    background: 'linear-gradient(90deg, rgba(255,255,255,0), rgba(255,235,196,0.45), rgba(255,255,255,0))',
-                    transition: 'left 0.9s ease',
-                    pointerEvents: 'none',
-                  }} />
-                  <div style={{
-                    fontFamily: '"Cormorant Garamond", serif',
-                    fontSize: '28px',
-                    lineHeight: '1.75',
-                    color: '#173A2C',
-                    whiteSpace: 'pre-wrap',
-                    fontStyle: 'italic',
-                  }}>
-                    {messagePreview}
-                  </div>
+                  — Sent from your Legacy Vault
                 </div>
               </div>
             </div>
@@ -1145,11 +1028,9 @@ export default function StartPage() {
           textAlign: 'center',
           fontFamily: '"Cormorant Garamond", serif',
           fontStyle: 'italic',
-          fontSize: '30px',
+          fontSize: '31px',
           color: 'rgba(31,46,35,0.84)',
-          marginBottom: '20px',
-          opacity: step4Phase >= 3 ? 1 : 0.7,
-          transition: 'opacity 0.4s ease',
+          marginBottom: '22px',
         }}>
           This is what they would receive.
         </div>

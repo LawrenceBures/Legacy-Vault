@@ -1,13 +1,11 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { CountdownBanner } from '@/lib/FoundersSection'
 import LiveVaultDemo from '@/components/LiveVaultDemo'
 
 export default function LandingPage() {
   const [openFaq, setOpenFaq] = useState<number | null>(null)
   const [isMobile, setIsMobile] = useState(false)
-  const [hoveredFeature, setHoveredFeature] = useState<number | null>(null)
 
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 768)
@@ -19,84 +17,21 @@ export default function LandingPage() {
   const steps = [
     {
       num: '01',
-      title: 'Create your message',
-      desc: 'Record a video, leave a voice note, or write what needs to be said.',
-      icon: '🎥',
+      title: 'Start the guided setup',
+      desc: 'Begin with a simple flow that helps you create the first vault entry without needing everything planned upfront.',
+      icon: '🧭',
     },
     {
       num: '02',
       title: 'Choose who receives it',
-      desc: 'Assign each message, document, or instruction to the right person.',
+      desc: 'Select the recipient and write the message you want them to receive when the time is right.',
       icon: '👥',
     },
     {
       num: '03',
-      title: 'Set your delivery',
-      desc: 'Choose milestone-based delivery, inactivity rules, or other release timing.',
+      title: 'Set the delivery trigger',
+      desc: 'Choose the condition that should release the message, then preview how the delivery will feel.',
       icon: '⏱',
-    },
-  ]
-
-  const winCards = [
-    {
-      title: 'Emotion that lasts',
-      desc: 'Legacy Vault preserves more than information. It preserves voice, timing, meaning, and emotional continuity.',
-    },
-    {
-      title: 'Delivery with structure',
-      desc: 'Messages, documents, and instructions are organized around people and release logic — not dumped into a folder and forgotten.',
-    },
-    {
-      title: 'Built to scale',
-      desc: 'Subscription tiers, family plans, milestone use cases, and document storage create a model that grows with user value over time.',
-    },
-  ]
-
-  const plans = [
-    {
-      name: 'Essential',
-      price: '$4.99',
-      period: 'per month',
-      dark: false,
-      popular: false,
-      features: [
-        '1 active vault',
-        'Text and audio entries',
-        'Up to 3 recipients',
-        'Basic delivery settings',
-        'Trusted contact support',
-      ],
-      cta: 'Choose Essential',
-    },
-    {
-      name: 'Legacy',
-      price: '$9.99',
-      period: 'per month',
-      dark: true,
-      popular: true,
-      features: [
-        'Unlimited vault entries',
-        'Unlimited recipients',
-        'Audio & video messages',
-        'Milestone delivery',
-        'Document storage',
-      ],
-      cta: 'Choose Legacy',
-    },
-    {
-      name: 'Family',
-      price: '$19.99',
-      period: 'per month',
-      dark: false,
-      popular: false,
-      features: [
-        'Up to 5 individual vaults',
-        'Shared family structure',
-        'Expanded storage',
-        'Family management tools',
-        'Multiple access roles',
-      ],
-      cta: 'Choose Family',
     },
   ]
 
@@ -118,8 +53,8 @@ export default function LandingPage() {
       a: 'No. Legacy Vault can also be used for milestone messages, family guidance, and preserving important context before it is needed.',
     },
     {
-      q: 'Why subscription pricing?',
-      a: 'Legacy Vault grows from individual planning to family-level structure, storage, and delivery control over time.',
+      q: 'How do I get started?',
+      a: 'Begin with the guided setup. You can choose a recipient, create a message, set a delivery trigger, and preview the experience before saving your vault.',
     },
   ]
 
@@ -174,13 +109,13 @@ export default function LandingPage() {
             <>
               <a href="#demo" style={navLinkStyle}>Demo</a>
               <a href="#why-now" style={navLinkStyle}>Why now</a>
-              <a href="#pricing" style={navLinkStyle}>Pricing</a>
+              <a href="#start" style={navLinkStyle}>Start</a>
               <a href="#faq" style={navLinkStyle}>FAQ</a>
             </>
           )}
 
-          <button
-            onClick={() => { window.location.href = '/sign-in' }}
+          <a
+            href="/sign-in"
             style={{
               padding: '10px 20px',
               background: 'transparent',
@@ -192,13 +127,15 @@ export default function LandingPage() {
               textTransform: 'uppercase',
               cursor: 'pointer',
               fontWeight: 500,
+              textDecoration: 'none',
+              display: 'inline-block',
             }}
           >
             Sign in
-          </button>
+          </a>
 
-          <button
-            onClick={() => { window.location.href = '/sign-up' }}
+          <a
+            href="/start"
             style={{
               padding: '10px 20px',
               background: '#C2A468',
@@ -210,14 +147,14 @@ export default function LandingPage() {
               textTransform: 'uppercase',
               cursor: 'pointer',
               fontWeight: 700,
+              textDecoration: 'none',
+              display: 'inline-block',
             }}
           >
             Begin your vault
-          </button>
+          </a>
         </div>
       </nav>
-
-      <CountdownBanner />
 
       <section
         style={{
@@ -316,7 +253,7 @@ export default function LandingPage() {
 
           <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap', marginBottom: '1.25rem' }}>
             <a
-              href="/sign-up"
+              href="/start"
               style={{
                 padding: '16px 40px',
                 background: '#C2A468',
@@ -379,7 +316,7 @@ export default function LandingPage() {
               margin: 0,
             }}
           >
-            This is what your legacy actually looks like.
+            Preview the delivery before it is real.
           </h2>
         </div>
 
@@ -560,7 +497,7 @@ export default function LandingPage() {
               boxShadow: '0 14px 32px rgba(31,46,35,0.035)',
             }}
           >
-            <div style={eyebrowStyle}>Milestone delivery</div>
+            <div style={eyebrowStyle}>Delivery trigger setup</div>
             {[
               { icon: '🎂', label: 'When my daughter turns 18', date: 'June 14, 2031' },
               { icon: '💍', label: 'On our 25th anniversary', date: 'September 3, 2028' },
@@ -617,7 +554,7 @@ export default function LandingPage() {
               <em style={{ color: '#B89B5E' }}>actually arrives.</em>
             </h2>
             <p style={{ fontSize: '16px', color: 'rgba(31,46,35,0.55)', lineHeight: 1.8, margin: '0 0 1.5rem' }}>
-              Schedule messages for the moments that define a life — birthdays, anniversaries, graduations. You decide when. Legacy Vault makes sure it arrives with intention.
+              Set the trigger for when a message should be released. The current flow keeps setup focused: choose the recipient, create the message, pick the trigger, and preview the delivery.
             </p>
             <p
               style={{
@@ -764,14 +701,14 @@ export default function LandingPage() {
       </section>
 
       <section
-        id="pricing"
+        id="start"
         style={{
           padding: isMobile ? '72px 20px' : '112px 40px',
           background: '#F5F3EF',
         }}
       >
-        <div style={{ maxWidth: '1300px', margin: '0 auto', textAlign: 'center' }}>
-          <div style={eyebrowStyle}>Pricing</div>
+        <div style={{ maxWidth: '900px', margin: '0 auto', textAlign: 'center' }}>
+          <div style={eyebrowStyle}>Start your vault</div>
           <h2
             style={{
               fontFamily: 'Cormorant Garamond, serif',
@@ -781,137 +718,33 @@ export default function LandingPage() {
               margin: '0 0 1rem',
             }}
           >
-            Choose the structure
+            Begin with the guided
             <br />
-            that fits your legacy.
+            MVP flow.
           </h2>
-          <p style={{ fontSize: '14px', color: 'rgba(31,46,35,0.5)', marginBottom: '2.5rem' }}>
-            Legacy Vault is designed to scale from individuals to families, with higher-value tiers tied to storage, delivery control, and shared planning.
+          <p style={{ fontSize: '16px', color: 'rgba(31,46,35,0.58)', lineHeight: 1.8, margin: '0 auto 2rem', maxWidth: '640px' }}>
+            Pricing is not shown here yet. For now, the public site should send people into the guided setup where they can choose a recipient, create a message, set a delivery trigger, and preview the delivery experience.
           </p>
 
-          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)', gap: '1rem', alignItems: 'start' }}>
-            {plans.map((plan, i) => (
-              <div
-                key={i}
-                style={{
-                  background: plan.dark ? '#1F2E23' : '#fff',
-                  border: plan.popular ? '2px solid #B89B5E' : `1px solid ${plan.dark ? 'rgba(184,155,94,0.2)' : 'rgba(31,46,35,0.08)'}`,
-                  borderRadius: '14px',
-                  padding: '1.6rem',
-                  textAlign: 'left',
-                  position: 'relative',
-                  boxShadow: plan.popular ? '0 18px 40px rgba(31,46,35,0.08)' : '0 12px 26px rgba(31,46,35,0.04)',
-                  transition: 'all 0.25s ease',
-                  transform: 'translateY(0px)',
-                }}
-              >
-                {plan.popular && (
-                  <div
-                    style={{
-                      position: 'absolute',
-                      top: '-12px',
-                      left: '50%',
-                      transform: 'translateX(-50%)',
-                      background: '#B89B5E',
-                      color: '#1F2E23',
-                      fontSize: '9px',
-                      letterSpacing: '.12em',
-                      textTransform: 'uppercase',
-                      padding: '4px 12px',
-                      borderRadius: '20px',
-                      fontWeight: 700,
-                      whiteSpace: 'nowrap',
-                    }}
-                  >
-                    Most popular
-                  </div>
-                )}
-
-                <div
-                  style={{
-                    fontSize: '11px',
-                    letterSpacing: '.15em',
-                    textTransform: 'uppercase',
-                    color: plan.dark ? '#B89B5E' : 'rgba(31,46,35,0.4)',
-                    marginBottom: '.5rem',
-                  }}
-                >
-                  {plan.name}
-                </div>
-
-                <div
-                  style={{
-                    fontFamily: 'Cormorant Garamond, serif',
-                    fontSize: '32px',
-                    fontWeight: 300,
-                    color: plan.dark ? '#F5F3EF' : '#1F2E23',
-                    marginBottom: '.25rem',
-                  }}
-                >
-                  {plan.price}
-                </div>
-
-                <div
-                  style={{
-                    fontSize: '11px',
-                    color: plan.dark ? 'rgba(245,243,239,0.35)' : 'rgba(31,46,35,0.4)',
-                    marginBottom: '1.25rem',
-                  }}
-                >
-                  {plan.period}
-                </div>
-
-                {plan.features.map((item, j) => (
-                  <div key={j} style={{ display: 'flex', gap: '7px', alignItems: 'flex-start', marginBottom: '.55rem' }}>
-                    <div
-                      style={{
-                        width: '13px',
-                        height: '13px',
-                        borderRadius: '50%',
-                        background: plan.dark ? 'rgba(184,155,94,0.2)' : 'rgba(184,155,94,0.12)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontSize: '8px',
-                        color: '#B89B5E',
-                        flexShrink: 0,
-                        marginTop: '2px',
-                      }}
-                    >
-                      ✓
-                    </div>
-                    <div style={{ fontSize: '11px', color: plan.dark ? 'rgba(245,243,239,0.7)' : 'rgba(31,46,35,0.65)', lineHeight: 1.4 }}>
-                      {item}
-                    </div>
-                  </div>
-                ))}
-
-                <a
-                  href="/sign-up"
-                  style={{
-                    display: 'block',
-                    width: '100%',
-                    padding: '10px',
-                    border: plan.popular ? 'none' : `1px solid ${plan.dark ? 'rgba(184,155,94,0.3)' : 'rgba(31,46,35,0.2)'}`,
-                    borderRadius: '4px',
-                    background: plan.popular ? '#B89B5E' : 'transparent',
-                    color: plan.popular ? '#1F2E23' : plan.dark ? '#B89B5E' : '#1F2E23',
-                    fontSize: '10px',
-                    letterSpacing: '.1em',
-                    textTransform: 'uppercase',
-                    cursor: 'pointer',
-                    marginTop: '1rem',
-                    fontWeight: plan.popular ? 700 : 500,
-                    textDecoration: 'none',
-                    textAlign: 'center',
-                    boxSizing: 'border-box',
-                  }}
-                >
-                  {plan.cta}
-                </a>
-              </div>
-            ))}
-          </div>
+          <a
+            href="/start"
+            style={{
+              display: 'inline-block',
+              padding: '16px 44px',
+              background: '#B89B5E',
+              color: '#1F2E23',
+              border: 'none',
+              borderRadius: '4px',
+              fontSize: '13px',
+              letterSpacing: '.15em',
+              textTransform: 'uppercase',
+              cursor: 'pointer',
+              fontWeight: 700,
+              textDecoration: 'none',
+            }}
+          >
+            Begin your vault
+          </a>
         </div>
       </section>
 
@@ -996,7 +829,7 @@ export default function LandingPage() {
             Legacy Vault gives families something more useful than storage: clarity, timing, and the human meaning behind what gets left behind.
           </p>
           <a
-            href="/sign-up"
+            href="/start"
             style={{
               display: 'inline-block',
               padding: '18px 52px',

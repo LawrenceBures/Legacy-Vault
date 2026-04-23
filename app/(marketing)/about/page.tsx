@@ -26,7 +26,7 @@ export default function AboutPage() {
         <button onClick={() => router.push('/')} style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '20px', fontWeight: 600, color: '#B89B5E', letterSpacing: '.05em', background: 'none', border: 'none', cursor: 'pointer' }}>Legacy Vault</button>
         <div style={{ display: 'flex', gap: '16px' }}>
           <button onClick={() => router.push('/sign-in')} style={{ padding: '9px 22px', background: 'transparent', color: '#B89B5E', border: '1px solid rgba(184,155,94,0.4)', borderRadius: '4px', fontSize: '12px', letterSpacing: '.1em', textTransform: 'uppercase', cursor: 'pointer', fontWeight: 500 }}>Sign in</button>
-          <button onClick={() => router.push('/sign-up')} style={{ padding: '9px 22px', background: '#B89B5E', color: '#1F2E23', border: 'none', borderRadius: '4px', fontSize: '12px', letterSpacing: '.1em', textTransform: 'uppercase', cursor: 'pointer', fontWeight: 700 }}>Start free</button>
+          <button onClick={() => router.push('/start')} style={{ padding: '9px 22px', background: '#B89B5E', color: '#1F2E23', border: 'none', borderRadius: '4px', fontSize: '12px', letterSpacing: '.1em', textTransform: 'uppercase', cursor: 'pointer', fontWeight: 700 }}>Start free</button>
         </div>
       </nav>
 
@@ -132,12 +132,12 @@ export default function AboutPage() {
           <p style={{ fontSize: '16px', color: 'rgba(245,243,239,0.45)', lineHeight: 1.8, margin: '0 0 3rem', fontFamily: 'Cormorant Garamond, serif', fontStyle: 'italic' }}>
             Your vault takes 3 minutes to set up.<br/>What it preserves lasts a lifetime.
           </p>
-          <button onClick={() => router.push('/sign-up')}
+          <button onClick={() => router.push('/start')}
             onMouseEnter={() => setHoveredBtn('cta')} onMouseLeave={() => setHoveredBtn(null)}
             style={{ padding: '16px 44px', background: '#B89B5E', color: '#1F2E23', border: 'none', borderRadius: '4px', fontSize: '13px', letterSpacing: '.15em', textTransform: 'uppercase', cursor: 'pointer', fontWeight: 700, transition: 'all 0.2s', transform: hoveredBtn === 'cta' ? 'translateY(-2px)' : 'none' }}>
             Begin your legacy
           </button>
-          <div style={{ marginTop: '1.5rem', fontSize: '12px', color: 'rgba(245,243,239,0.2)' }}>Free trial · No credit card required</div>
+          <div style={{ marginTop: '1.5rem', fontSize: '12px', color: 'rgba(245,243,239,0.2)' }}>Guided setup · No credit card required</div>
         </div>
       </section>
 
