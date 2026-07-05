@@ -104,7 +104,6 @@ function VideoContent({ entry, senderName }: { entry: Entry; senderName: string 
               muted={!unmuted}
               controls={unmuted}
               playsInline
-              loop
               onClick={() => setUnmuted(true)}
               style={{ width: '100%', display: 'block', cursor: unmuted ? 'default' : 'pointer' }}
               src={`/api/vault/media?path=${encodeURIComponent(entry.media_url)}`}
@@ -219,17 +218,18 @@ function ReceivePageContent() {
   const [entry, setEntry] = useState<Entry | null>(null)
   const [senderName, setSenderName] = useState('Someone who loves you')
   const [loading, setLoading] = useState(true)
-  const [opened, setOpened] = useState(false)
-  const [vaultAnimating, setVaultAnimating] = useState(true)
+  const [opened, setOpened] = useState(!entryId)
+  const [vaultAnimating, setVaultAnimating] = useState(!!entryId)
 
   useEffect(() => {
+    if (!entryId) return // Skip animation if no entry param
     // Vault opening animation: 3 seconds
     const timer = setTimeout(() => {
       setVaultAnimating(false)
       setTimeout(() => setOpened(true), 300)
     }, 3000)
     return () => clearTimeout(timer)
-  }, [])
+  }, [entryId])
 
   useEffect(() => {
     if (!entryId) {

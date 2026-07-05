@@ -42,53 +42,67 @@ export default function OnboardingPage() {
     return createSupabaseClient(token!)
   }, [getToken])
 
+  const finishOnboarding = async (plan: string) => {
+    const supabase = await getSupabase()
+    await supabase.from('profiles').upsert({
+      clerk_id: user!.id,
+      email: user!.emailAddresses[0].emailAddress,
+      full_name: user!.fullName || user!.firstName || '',
+      plan,
+      has_completed_onboarding: true,
+    }, { onConflict: 'clerk_id' })
+
+    const { data: profile } = await supabase
+      .from('profiles').select('id').eq('clerk_id', user!.id).single()
+
+    if (profile) {
+      if (recipientName && recipientEmail) {
+        await supabase.from('recipients').insert({
+          user_id: profile.id,
+          name: recipientName,
+          email: recipientEmail,
+          relationship: recipientRelationship || 'Other',
+        })
+      }
+      if (deliveryType) {
+        await supabase.from('delivery_settings').upsert({
+          user_id: profile.id,
+          inactivity_enabled: deliveryType === 'inactivity',
+          time_window_days: parseInt(inactivityDays),
+          unlock_enabled: deliveryType === 'unlock',
+          updated_at: new Date().toISOString(),
+        }, { onConflict: 'user_id' })
+      }
+    }
+  }
+
   const handleComplete = async () => {
     if (!user) return
     setSaving(true)
     try {
-      const supabase = await getSupabase()
-      await supabase.from('profiles').upsert({
-        id: crypto.randomUUID(),
-        clerk_id: user.id,
-        email: user.emailAddresses[0].emailAddress,
-        full_name: user.fullName || user.firstName || '',
-        plan: selectedTier || 'starter_founder',
-        has_completed_onboarding: true,
-      }, { onConflict: 'clerk_id' })
+      // Paid tier: redirect to Stripe checkout first
+      if (selectedTier === 'legacy_founder') {
+        // Save profile as free first (webhook will upgrade after payment)
+        await finishOnboarding('free')
 
-      const { data: profile } = await supabase
-        .from('profiles').select('id').eq('clerk_id', user.id).single()
-
-      if (profile) {
-        if (messageTitle && entryType) {
-          await supabase.from('vault_entries').insert({
-            user_id: profile.id,
-            title: messageTitle,
-            message_content: messageContent || null,
-            format: entryType,
-            status: 'active',
-            delivery_trigger: 'inactivity',
-            inactivity_days: parseInt(inactivityDays),
-          })
-        }
-        if (recipientName && recipientEmail) {
-          await supabase.from('recipients').insert({
-            user_id: profile.id,
-            name: recipientName,
-            email: recipientEmail,
-            relationship: recipientRelationship || 'Other',
-          })
-        }
-        if (deliveryType) {
-          await supabase.from('delivery_settings').upsert({
-            user_id: profile.id,
-            inactivity_enabled: deliveryType === 'inactivity',
-            time_window_days: parseInt(inactivityDays),
-            unlock_enabled: deliveryType === 'unlock',
-            updated_at: new Date().toISOString(),
-          }, { onConflict: 'user_id' })
+        const res = await fetch('/api/stripe/checkout', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            tier: 'legacy_founder',
+            clerk_id: user.id,
+            email: user.emailAddresses[0].emailAddress,
+          }),
+        })
+        const data = await res.json()
+        if (data.url) {
+          window.location.href = data.url
+          return
         }
       }
+
+      // Free tier: complete directly
+      await finishOnboarding(selectedTier || 'free')
       setStep(4)
     } catch (err) {
       console.error('Onboarding error:', err)
@@ -102,8 +116,8 @@ export default function OnboardingPage() {
   const firstName = user.firstName || user.emailAddresses[0].emailAddress.split('@')[0]
 
   const entryTypes = [
-    { id: 'video', icon: '🎥', label: 'Video Message', desc: 'The most powerful gift — your face, your voice, your presence.', notice: '15 sec limit until launch' },
-    { id: 'audio', icon: '🎙️', label: 'Voice Recording', desc: 'Let them hear you, exactly as you are.', notice: '15 sec limit until launch' },
+    { id: 'video', icon: '🎥', label: 'Video Message', desc: 'The most powerful gift — your face, your voice, your presence.', notice: null },
+    { id: 'audio', icon: '🎙️', label: 'Voice Recording', desc: 'Let them hear you, exactly as you are.', notice: null },
     { id: 'text', icon: '✍️', label: 'Written Letter', desc: 'Words that will outlast everything.', notice: null },
   ]
 

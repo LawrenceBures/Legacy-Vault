@@ -1,6 +1,6 @@
 'use client'
 
-import { useUser, UserButton, SignOutButton } from '@clerk/nextjs'
+import { useUser, UserButton } from '@clerk/nextjs'
 import { useRouter, useParams } from 'next/navigation'
 import { useEffect, useState, useCallback } from 'react'
 

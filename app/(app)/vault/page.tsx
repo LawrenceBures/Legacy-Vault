@@ -1,6 +1,6 @@
 'use client'
 
-import { useUser, UserButton, useAuth, SignOutButton } from '@clerk/nextjs'
+import { useUser, UserButton, useAuth } from '@clerk/nextjs'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState, useCallback } from 'react'
 import { createSupabaseClient } from '@/lib/supabase-auth'
@@ -136,6 +136,13 @@ export default function VaultPage() {
   const formatDate = (dateStr: string) =>
     new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
 
+  const getStatusLabel = (entry: Entry) => {
+    const hasRecipients = entry.recipientNames && entry.recipientNames.length > 0
+    if (entry.status === 'delivered') return { label: 'Delivered', bg: 'rgba(52,152,219,0.08)', color: '#2980b9', border: 'rgba(52,152,219,0.2)' }
+    if (hasRecipients) return { label: 'Sealed', bg: 'rgba(46,204,113,0.08)', color: '#27ae60', border: 'rgba(46,204,113,0.2)' }
+    return { label: 'Draft', bg: 'rgba(184,155,94,0.08)', color: '#B89B5E', border: 'rgba(184,155,94,0.2)' }
+  }
+
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: '#F5F3EF' }}>
 
@@ -203,20 +210,6 @@ export default function VaultPage() {
           transition: 'all 0.25s ease',
         }}>
           <UserButton />
-          <SignOutButton>
-            <button style={{
-              background: 'transparent',
-              border: 'none',
-              color: 'rgba(245,243,239,0.45)',
-              fontSize: '10px',
-              letterSpacing: '.12em',
-              textTransform: 'uppercase',
-              cursor: 'pointer',
-              padding: 0,
-            }}>
-              {sidebarOpen ? 'Sign out' : '↩'}
-            </button>
-          </SignOutButton>
         </div>
       </aside>
 
@@ -327,14 +320,19 @@ export default function VaultPage() {
                       {entry.format} · {formatDate(entry.created_at)}
                     </div>
                   </div>
-                  <div style={{
-                    fontSize: '9px', padding: '3px 8px', borderRadius: '20px',
-                    background: 'rgba(46,204,113,0.08)', color: '#27ae60',
-                    border: '1px solid rgba(46,204,113,0.2)', letterSpacing: '.08em',
-                    textTransform: 'uppercase', flexShrink: 0,
-                  }}>
-                    {entry.status}
-                  </div>
+                  {(() => {
+                    const st = getStatusLabel(entry)
+                    return (
+                      <div style={{
+                        fontSize: '9px', padding: '3px 8px', borderRadius: '20px',
+                        background: st.bg, color: st.color,
+                        border: `1px solid ${st.border}`, letterSpacing: '.08em',
+                        textTransform: 'uppercase', flexShrink: 0,
+                      }}>
+                        {st.label}
+                      </div>
+                    )
+                  })()}
                 </div>
 
                 {entry.message_content && (
@@ -355,7 +353,7 @@ export default function VaultPage() {
                       ? entry.recipientNames.join(', ')
                       : 'No recipients assigned'}
                   </div>
-                  <div style={{ fontSize: '11px', color: '#B89B5E' }}>Edit →</div>
+                  <div style={{ fontSize: '11px', color: '#B89B5E' }}>View →</div>
                 </div>
               </div>
             ))}

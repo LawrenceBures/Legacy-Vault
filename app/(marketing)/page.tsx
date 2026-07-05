@@ -6,6 +6,7 @@ import LiveVaultDemo from '@/components/LiveVaultDemo'
 export default function LandingPage() {
   const [openFaq, setOpenFaq] = useState<number | null>(null)
   const [isMobile, setIsMobile] = useState(false)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 768)
@@ -114,25 +115,27 @@ export default function LandingPage() {
             </>
           )}
 
-          <a
-            href="/sign-in"
-            style={{
-              padding: '10px 20px',
-              background: 'transparent',
-              color: '#B89B5E',
-              border: '1px solid rgba(184,155,94,0.35)',
-              borderRadius: '4px',
-              fontSize: '12px',
-              letterSpacing: '.1em',
-              textTransform: 'uppercase',
-              cursor: 'pointer',
-              fontWeight: 500,
-              textDecoration: 'none',
-              display: 'inline-block',
-            }}
-          >
-            Sign in
-          </a>
+          {!isMobile && (
+            <a
+              href="/sign-in"
+              style={{
+                padding: '10px 20px',
+                background: 'transparent',
+                color: '#B89B5E',
+                border: '1px solid rgba(184,155,94,0.35)',
+                borderRadius: '4px',
+                fontSize: '12px',
+                letterSpacing: '.1em',
+                textTransform: 'uppercase',
+                cursor: 'pointer',
+                fontWeight: 500,
+                textDecoration: 'none',
+                display: 'inline-block',
+              }}
+            >
+              Sign in
+            </a>
+          )}
 
           <a
             href="/start"
@@ -153,7 +156,53 @@ export default function LandingPage() {
           >
             Begin your vault
           </a>
+
+          {isMobile && (
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              style={{
+                background: 'transparent',
+                border: '1px solid rgba(184,155,94,0.3)',
+                borderRadius: '4px',
+                color: '#B89B5E',
+                fontSize: '18px',
+                cursor: 'pointer',
+                padding: '6px 10px',
+                lineHeight: 1,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              {mobileMenuOpen ? '\u2715' : '\u2630'}
+            </button>
+          )}
         </div>
+
+        {/* Mobile dropdown menu */}
+        {isMobile && mobileMenuOpen && (
+          <div style={{
+            position: 'absolute',
+            top: '68px',
+            left: 0,
+            right: 0,
+            background: 'rgba(20,30,24,0.98)',
+            borderBottom: '1px solid rgba(184,155,94,0.15)',
+            padding: '16px 24px',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '16px',
+            backdropFilter: 'blur(10px)',
+          }}>
+            <a href="#demo" onClick={() => setMobileMenuOpen(false)} style={{ ...navLinkStyle, fontSize: '15px', padding: '8px 0' }}>Demo</a>
+            <a href="#why-now" onClick={() => setMobileMenuOpen(false)} style={{ ...navLinkStyle, fontSize: '15px', padding: '8px 0' }}>Why now</a>
+            <a href="#start" onClick={() => setMobileMenuOpen(false)} style={{ ...navLinkStyle, fontSize: '15px', padding: '8px 0' }}>Start</a>
+            <a href="#faq" onClick={() => setMobileMenuOpen(false)} style={{ ...navLinkStyle, fontSize: '15px', padding: '8px 0' }}>FAQ</a>
+            <div style={{ borderTop: '1px solid rgba(184,155,94,0.12)', paddingTop: '12px' }}>
+              <a href="/sign-in" style={{ ...navLinkStyle, fontSize: '14px', color: '#B89B5E' }}>Sign in</a>
+            </div>
+          </div>
+        )}
       </nav>
 
       <section

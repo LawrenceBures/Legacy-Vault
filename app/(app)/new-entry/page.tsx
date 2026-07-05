@@ -1,6 +1,6 @@
 'use client'
 
-import { useUser, UserButton, useAuth, SignOutButton } from '@clerk/nextjs'
+import { useUser, UserButton, useAuth } from '@clerk/nextjs'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState, useRef, useCallback } from 'react'
 import { createSupabaseClient } from '@/lib/supabase-auth'
@@ -73,6 +73,7 @@ export default function NewEntryPage() {
     try {
       const formData = new FormData()
       formData.append('title', title)
+      formData.append('description', description)
       formData.append('message', message)
       formData.append('entryFormat', entryFormat || 'text')
       formData.append('email', user.emailAddresses[0].emailAddress)
@@ -442,7 +443,7 @@ if (!isLoaded || !user) return null
                         </div>
                       )}
                       <div style={{ fontSize: '11px', color: 'rgba(31,46,35,0.4)', marginTop: '4px' }}>
-                        Uses your {entryFormat === 'video' ? 'camera & microphone' : 'microphone'} · 15 sec limit pre-launch
+                        Uses your {entryFormat === 'video' ? 'camera & microphone' : 'microphone'} · Record a short message
                       </div>
                     </div>
                   )}

@@ -1,6 +1,6 @@
 'use client'
 
-import { useUser, UserButton, useAuth, SignOutButton } from '@clerk/nextjs'
+import { useUser, UserButton, useAuth } from '@clerk/nextjs'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState, useCallback } from 'react'
 import { createSupabaseClient } from '@/lib/supabase-auth'
@@ -9,6 +9,14 @@ export default function DeliveryPage() {
   const { user, isLoaded } = useUser()
   const { getToken } = useAuth()
   const router = useRouter()
+  const [isMobile, setIsMobile] = useState(false)
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768)
+    check()
+    window.addEventListener('resize', check)
+    return () => window.removeEventListener('resize', check)
+  }, [])
+
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [hoveredNav, setHoveredNav] = useState<number | null>(null)
   const [hoveredBtn, setHoveredBtn] = useState<string | null>(null)
@@ -98,7 +106,7 @@ export default function DeliveryPage() {
         warning_email: warningEmail,
         warning_sms: warningSMS,
         unlock_enabled: unlockEnabled,
-        unlock_code_hash: unlockEnabled ? unlockCode : null,
+        unlock_code: unlockEnabled ? unlockCode : null,
         updated_at: new Date().toISOString(),
       }, { onConflict: 'user_id' })
 
@@ -135,9 +143,9 @@ export default function DeliveryPage() {
   )
 
   const CheckBox = ({ checked, onChange, label }: { checked: boolean; onChange: () => void; label: string }) => (
-    <div onClick={onChange} style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }}>
-      <div style={{ width: '18px', height: '18px', borderRadius: '3px', flexShrink: 0, border: `1px solid ${checked ? '#B89B5E' : 'rgba(31,46,35,0.2)'}`, background: checked ? '#1F2E23' : '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.18s ease' }}>
-        {checked && <span style={{ color: '#B89B5E', fontSize: '11px', lineHeight: 1 }}>✓</span>}
+    <div onClick={onChange} style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', padding: '4px 0', minHeight: '36px' }}>
+      <div style={{ width: '22px', height: '22px', borderRadius: '4px', flexShrink: 0, border: `1px solid ${checked ? '#B89B5E' : 'rgba(31,46,35,0.2)'}`, background: checked ? '#1F2E23' : '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.18s ease' }}>
+        {checked && <span style={{ color: '#B89B5E', fontSize: '12px', lineHeight: 1 }}>✓</span>}
       </div>
       <span style={{ fontSize: '13px', color: '#1F2E23' }}>{label}</span>
     </div>
@@ -145,7 +153,7 @@ export default function DeliveryPage() {
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: '#F5F3EF' }}>
-      <aside onMouseEnter={() => setSidebarOpen(true)} onMouseLeave={() => setSidebarOpen(false)} style={{ width: sidebarOpen ? '200px' : '64px', background: '#1F2E23', display: 'flex', flexDirection: 'column', alignItems: sidebarOpen ? 'flex-start' : 'center', padding: '20px 0', gap: '6px', borderRight: '1px solid rgba(184,155,94,0.1)', flexShrink: 0, transition: 'width 0.25s ease', overflow: 'hidden', position: 'relative', zIndex: 10 }}>
+      <aside onMouseEnter={() => setSidebarOpen(true)} onMouseLeave={() => setSidebarOpen(false)} style={{ display: isMobile ? 'none' : 'flex', width: sidebarOpen ? '200px' : '64px', background: '#1F2E23', flexDirection: 'column', alignItems: sidebarOpen ? 'flex-start' : 'center', padding: '20px 0', gap: '6px', borderRight: '1px solid rgba(184,155,94,0.1)', flexShrink: 0, transition: 'width 0.25s ease', overflow: 'hidden', position: 'relative', zIndex: 10 }}>
         <div style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: sidebarOpen ? '13px' : '10px', fontWeight: 600, color: '#B89B5E', letterSpacing: '.05em', textAlign: sidebarOpen ? 'left' : 'center', lineHeight: 1.2, paddingBottom: '16px', borderBottom: '1px solid rgba(184,155,94,0.12)', marginBottom: '8px', width: '100%', paddingLeft: sidebarOpen ? '20px' : '0', paddingRight: sidebarOpen ? '20px' : '0', transition: 'all 0.25s ease', whiteSpace: 'nowrap' }}>
           {sidebarOpen ? 'Legacy Vault' : 'L\nV'}
         </div>
@@ -160,8 +168,8 @@ export default function DeliveryPage() {
         </div>
       </aside>
 
-      <main style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
-        <div style={{ padding: '28px 28px 24px', background: '#F5F3EF', borderBottom: '1px solid rgba(31,46,35,0.08)' }}>
+      <main style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', paddingBottom: isMobile ? '70px' : '0' }}>
+        <div style={{ padding: isMobile ? '20px 16px 16px' : '28px 28px 24px', background: '#F5F3EF', borderBottom: '1px solid rgba(31,46,35,0.08)' }}>
           <div style={{ fontSize: '9px', letterSpacing: '.25em', textTransform: 'uppercase', color: '#B89B5E', marginBottom: '8px' }}>Delivery Settings</div>
           <div style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '36px', fontWeight: 300, color: '#1F2E23', lineHeight: 1.1, marginBottom: '6px' }}>
             How your vault <em style={{ color: '#B89B5E', fontStyle: 'italic' }}>gets delivered.</em>
@@ -171,7 +179,7 @@ export default function DeliveryPage() {
           </div>
         </div>
 
-        <div style={{ padding: '0 28px', background: '#fff', borderBottom: '1px solid rgba(31,46,35,0.08)', display: 'flex' }}>
+        <div style={{ padding: isMobile ? '0 16px' : '0 28px', background: '#fff', borderBottom: '1px solid rgba(31,46,35,0.08)', display: 'flex' }}>
           {[{ id: 'inactivity', label: '⏱ Inactivity Trigger', desc: 'Auto-deliver after inactivity' }, { id: 'unlock', label: '🔑 Family Unlock Code', desc: 'Manual delivery via code' }].map(tab => (
             <button key={tab.id} onClick={() => setActiveTab(tab.id as 'inactivity' | 'unlock')} style={{ padding: '16px 24px', border: 'none', background: 'transparent', cursor: 'pointer', borderBottom: `2px solid ${activeTab === tab.id ? '#B89B5E' : 'transparent'}`, transition: 'all 0.18s ease', textAlign: 'left' }}>
               <div style={{ fontSize: '12px', fontWeight: 500, color: activeTab === tab.id ? '#1F2E23' : 'rgba(31,46,35,0.4)', marginBottom: '2px' }}>{tab.label}</div>
@@ -259,7 +267,7 @@ export default function DeliveryPage() {
         {loading ? (
           <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(31,46,35,0.35)', fontSize: '13px' }}>Loading settings...</div>
         ) : (
-          <div style={{ flex: 1, padding: '32px 28px', maxWidth: '680px', width: '100%', margin: '0 auto' }}>
+          <div style={{ flex: 1, padding: isMobile ? '24px 16px' : '32px 28px', maxWidth: '680px', width: '100%', margin: '0 auto' }}>
 
             {activeTab === 'inactivity' && (
               <div>
@@ -272,7 +280,7 @@ export default function DeliveryPage() {
                 </div>
                 <div style={{ background: '#fff', border: `1px solid ${inactivityEnabled ? 'rgba(184,155,94,0.25)' : 'rgba(31,46,35,0.08)'}`, borderRadius: '6px', padding: '24px', opacity: inactivityEnabled ? 1 : 0.45, pointerEvents: inactivityEnabled ? 'auto' : 'none', transition: 'all 0.22s ease', marginBottom: '16px' }}>
                   <div style={{ fontSize: '10px', letterSpacing: '.18em', textTransform: 'uppercase', color: 'rgba(31,46,35,0.35)', marginBottom: '20px', paddingBottom: '12px', borderBottom: '1px solid rgba(31,46,35,0.07)' }}>Trigger Configuration</div>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '24px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '20px', marginBottom: '24px' }}>
                     <div>
                       <label style={{ fontSize: '10px', letterSpacing: '.12em', textTransform: 'uppercase', color: 'rgba(31,46,35,0.45)', display: 'block', marginBottom: '8px' }}>Inactivity Window</label>
                       <select value={timeWindow} onChange={e => setTimeWindow(e.target.value)} style={selectStyle}>
@@ -297,7 +305,7 @@ export default function DeliveryPage() {
                   </div>
                   <div style={{ borderTop: '1px solid rgba(31,46,35,0.07)', paddingTop: '20px' }}>
                     <div style={{ fontSize: '10px', letterSpacing: '.15em', textTransform: 'uppercase', color: 'rgba(31,46,35,0.35)', marginBottom: '16px' }}>Warning Notifications</div>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '20px' }}>
                       <div>
                         <label style={{ fontSize: '10px', letterSpacing: '.12em', textTransform: 'uppercase', color: 'rgba(31,46,35,0.45)', display: 'block', marginBottom: '8px' }}>Warn me before delivery</label>
                         <select value={warningDays} onChange={e => setWarningDays(e.target.value)} style={selectStyle}>
@@ -368,6 +376,32 @@ export default function DeliveryPage() {
           </div>
         )}
       </main>
+
+      {/* MOBILE BOTTOM NAV */}
+      {isMobile && (
+        <div style={{
+          position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 100,
+          background: '#1F2E23', borderTop: '1px solid rgba(184,155,94,0.15)',
+          display: 'flex', alignItems: 'center', justifyContent: 'space-around',
+          padding: '8px 0', height: '60px',
+        }}>
+          {[
+            { icon: '⊞', label: 'Dashboard', href: '/dashboard' },
+            { icon: '🔒', label: 'Vault', href: '/vault' },
+            { icon: '+', label: 'New', href: '/new-entry' },
+            { icon: '👥', label: 'People', href: '/my-people' },
+            { icon: '⏱', label: 'Delivery', href: '/delivery' },
+          ].map(item => (
+            <a key={item.href} href={item.href} style={{
+              display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px',
+              textDecoration: 'none', flex: 1,
+            }}>
+              <div style={{ fontSize: item.icon === '+' ? '22px' : '16px', color: item.href === '/delivery' ? '#B89B5E' : 'rgba(245,243,239,0.5)' }}>{item.icon}</div>
+              <div style={{ fontSize: '9px', color: item.href === '/delivery' ? '#B89B5E' : 'rgba(245,243,239,0.4)', letterSpacing: '.04em' }}>{item.label}</div>
+            </a>
+          ))}
+        </div>
+      )}
     </div>
   )
 }

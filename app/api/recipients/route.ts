@@ -96,6 +96,74 @@ export async function POST(req: NextRequest) {
   }
 }
 
+export async function PATCH(req: NextRequest) {
+  try {
+    const { userId } = await auth();
+    if (!userId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const body = await req.json();
+    const { id, name, email, phone, relationship } = body;
+
+    if (!id) {
+      return NextResponse.json({ error: "Recipient ID is required." }, { status: 400 });
+    }
+    if (!name?.trim() || !email?.trim()) {
+      return NextResponse.json({ error: "Name and email are required." }, { status: 400 });
+    }
+
+    const supabase = createClient();
+
+    const { data: profile, error: profileError } = await supabase
+      .from("profiles")
+      .select("id")
+      .eq("clerk_id", userId)
+      .single();
+
+    if (profileError || !profile) {
+      return NextResponse.json({ error: "Profile not found" }, { status: 404 });
+    }
+
+    // Verify ownership
+    const { data: existing } = await supabase
+      .from("recipients")
+      .select("id")
+      .eq("id", id)
+      .eq("user_id", profile.id)
+      .single();
+
+    if (!existing) {
+      return NextResponse.json({ error: "Recipient not found" }, { status: 404 });
+    }
+
+    const { data: updated, error: updateError } = await supabase
+      .from("recipients")
+      .update({
+        name: name.trim(),
+        email: email.trim(),
+        phone: phone?.trim() || null,
+        relationship: relationship || "Other",
+      })
+      .eq("id", id)
+      .eq("user_id", profile.id)
+      .select("*")
+      .single();
+
+    if (updateError) {
+      throw updateError;
+    }
+
+    return NextResponse.json(updated);
+  } catch (err: any) {
+    console.error("PATCH /api/recipients error:", err);
+    return NextResponse.json(
+      { error: err?.message || "Internal server error" },
+      { status: 500 }
+    );
+  }
+}
+
 export async function DELETE(req: NextRequest) {
   try {
     const { userId } = await auth();
