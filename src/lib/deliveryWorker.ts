@@ -526,7 +526,7 @@ function buildVaultReleaseHtml(candidate: DeliveryCandidate, recipient: Recipien
         <p style="font-size:12px;color:rgba(31,46,35,0.45);line-height:1.6;margin:24px 0 0;">Release reason: ${reason}</p>
       </div>
       <div style="text-align:center;padding:24px 0 0;">
-        <a href="${siteUrl}" style="display:inline-block;padding:13px 28px;background:#B89B5E;color:#1F2E23;text-decoration:none;border-radius:4px;font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;">Open Legacy Vault</a>
+        <a href="${siteUrl}/receive/delivery?entry=${candidate.entry.id}" style="display:inline-block;padding:13px 28px;background:#B89B5E;color:#1F2E23;text-decoration:none;border-radius:4px;font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;">Open Your Message</a>
       </div>
     </div>
   </body>
@@ -541,7 +541,7 @@ function buildMessageHtml(entry: VaultEntryRow) {
   }
 
   const format = escapeHtml(entry.format || "message");
-  return `<p style="font-size:15px;line-height:1.7;color:rgba(31,46,35,0.7);margin:0;">A ${format} message has been released from Legacy Vault. Secure recipient media access is not yet represented by a public route in this codebase.</p>`;
+  return `<p style="font-size:15px;line-height:1.7;color:rgba(31,46,35,0.7);margin:0;">A ${format} message has been released from Legacy Vault. Click the button below to view it.</p>`;
 }
 
 function buildIdempotencyKey(candidate: DeliveryCandidate, recipient: RecipientRow) {
