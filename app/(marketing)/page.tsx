@@ -718,9 +718,9 @@ export default function LandingPage() {
               margin: '0 0 1rem',
             }}
           >
-            Begin with the guided
+            Begin with our guided
             <br />
-            MVP flow.
+            experience.
           </h2>
           <p style={{ fontSize: '16px', color: 'rgba(31,46,35,0.58)', lineHeight: 1.8, margin: '0 auto 2rem', maxWidth: '640px' }}>
             Create your first vault entry in minutes. Choose a recipient, write what matters most, set a delivery trigger, and preview how they will experience it.
@@ -745,6 +745,128 @@ export default function LandingPage() {
           >
             Begin your vault
           </a>
+        </div>
+      </section>
+
+      <section
+        id="pricing"
+        style={{
+          padding: isMobile ? '72px 20px' : '112px 40px',
+          background: '#1F2E23',
+        }}
+      >
+        <div style={{ maxWidth: '900px', margin: '0 auto', textAlign: 'center' }}>
+          <div style={eyebrowStyle}>Simple pricing</div>
+          <h2
+            style={{
+              fontFamily: 'Cormorant Garamond, serif',
+              fontSize: isMobile ? '34px' : '46px',
+              fontWeight: 300,
+              color: '#F5F3EF',
+              lineHeight: 1.2,
+              margin: '0 0 .75rem',
+            }}
+          >
+            One vault. <em style={{ color: '#B89B5E' }}>One price.</em>
+          </h2>
+          <p style={{ fontSize: '14px', color: 'rgba(245,243,239,0.45)', marginBottom: '2.5rem', letterSpacing: '.04em' }}>
+            One-time per vault. No subscription. No hidden fees.
+          </p>
+
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr',
+              gap: '1.5rem',
+              maxWidth: '700px',
+              margin: '0 auto',
+            }}
+          >
+            {/* Free tier */}
+            <div
+              style={{
+                background: 'rgba(245,243,239,0.04)',
+                border: '1px solid rgba(245,243,239,0.1)',
+                borderRadius: '14px',
+                padding: '2rem',
+                textAlign: 'left',
+              }}
+            >
+              <div style={{ fontSize: '10px', letterSpacing: '.2em', textTransform: 'uppercase', color: 'rgba(245,243,239,0.4)', marginBottom: '1rem' }}>Free</div>
+              <div style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '36px', fontWeight: 300, color: '#F5F3EF', marginBottom: '.5rem' }}>$0</div>
+              <div style={{ fontSize: '13px', color: 'rgba(245,243,239,0.45)', marginBottom: '1.5rem', fontFamily: 'Cormorant Garamond, serif', fontStyle: 'italic' }}>Try it out</div>
+              {['1 text entry', '1 recipient', 'Inactivity trigger'].map((f, i) => (
+                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                  <div style={{ fontSize: '10px', color: 'rgba(245,243,239,0.3)' }}>&#10003;</div>
+                  <div style={{ fontSize: '13px', color: 'rgba(245,243,239,0.55)' }}>{f}</div>
+                </div>
+              ))}
+              <a
+                href="/start"
+                style={{
+                  display: 'block',
+                  marginTop: '1.5rem',
+                  padding: '12px',
+                  textAlign: 'center',
+                  border: '1px solid rgba(245,243,239,0.15)',
+                  borderRadius: '4px',
+                  color: 'rgba(245,243,239,0.6)',
+                  fontSize: '11px',
+                  letterSpacing: '.12em',
+                  textTransform: 'uppercase',
+                  textDecoration: 'none',
+                }}
+              >
+                Start free
+              </a>
+            </div>
+
+            {/* Legacy tier */}
+            <div
+              style={{
+                background: 'rgba(184,155,94,0.08)',
+                border: '1px solid rgba(184,155,94,0.35)',
+                borderRadius: '14px',
+                padding: '2rem',
+                textAlign: 'left',
+                position: 'relative',
+              }}
+            >
+              <div style={{ position: 'absolute', top: '-10px', right: '16px', fontSize: '9px', padding: '4px 12px', background: '#B89B5E', color: '#1F2E23', borderRadius: '20px', fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase' }}>
+                Everything unlocked
+              </div>
+              <div style={{ fontSize: '10px', letterSpacing: '.2em', textTransform: 'uppercase', color: '#B89B5E', marginBottom: '1rem' }}>Legacy</div>
+              <div style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '36px', fontWeight: 300, color: '#F5F3EF', marginBottom: '.5rem' }}>
+                $9.99 <span style={{ fontSize: '14px', color: 'rgba(245,243,239,0.4)' }}>one-time</span>
+              </div>
+              <div style={{ fontSize: '13px', color: 'rgba(245,243,239,0.45)', marginBottom: '1.5rem', fontFamily: 'Cormorant Garamond, serif', fontStyle: 'italic' }}>Everything you need to leave a meaningful legacy</div>
+              {['Unlimited entries', 'Unlimited recipients', 'Video & audio messages', 'AI writing assistant', 'All delivery triggers', 'Family unlock code'].map((f, i) => (
+                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                  <div style={{ fontSize: '10px', color: '#B89B5E' }}>&#10003;</div>
+                  <div style={{ fontSize: '13px', color: 'rgba(245,243,239,0.65)' }}>{f}</div>
+                </div>
+              ))}
+              <a
+                href="/start"
+                style={{
+                  display: 'block',
+                  marginTop: '1.5rem',
+                  padding: '12px',
+                  textAlign: 'center',
+                  background: '#B89B5E',
+                  color: '#1F2E23',
+                  borderRadius: '4px',
+                  fontSize: '11px',
+                  fontWeight: 700,
+                  letterSpacing: '.12em',
+                  textTransform: 'uppercase',
+                  textDecoration: 'none',
+                }}
+              >
+                Begin your vault
+              </a>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -881,17 +1003,21 @@ export default function LandingPage() {
         </div>
 
         <div style={{ display: 'flex', gap: '1.5rem' }}>
-          {['Privacy', 'Terms', 'About'].map((item) => (
+          {[
+            { label: 'Privacy', href: '/terms' },
+            { label: 'Terms', href: '/terms' },
+            { label: 'About', href: '/about' },
+          ].map((item) => (
             <a
-              key={item}
-              href="#"
+              key={item.label}
+              href={item.href}
               style={{
                 fontSize: '12px',
                 color: 'rgba(245,243,239,0.34)',
                 textDecoration: 'none',
               }}
             >
-              {item}
+              {item.label}
             </a>
           ))}
         </div>

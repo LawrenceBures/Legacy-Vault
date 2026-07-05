@@ -180,6 +180,82 @@ export default function DeliveryPage() {
           ))}
         </div>
 
+        {/* Recipient delivery preview */}
+        <div style={{ padding: '28px', borderBottom: '1px solid rgba(31,46,35,0.08)' }}>
+          <div style={{ maxWidth: '680px', margin: '0 auto' }}>
+            <div style={{ fontSize: '10px', letterSpacing: '.18em', textTransform: 'uppercase', color: 'rgba(31,46,35,0.35)', marginBottom: '16px' }}>
+              What your recipients will receive
+            </div>
+            <div style={{
+              background: '#fff',
+              border: '1px solid rgba(31,46,35,0.1)',
+              borderRadius: '10px',
+              overflow: 'hidden',
+              boxShadow: '0 8px 24px rgba(31,46,35,0.06)',
+            }}>
+              {/* Email header mockup */}
+              <div style={{ padding: '20px 24px', borderBottom: '1px solid rgba(31,46,35,0.06)', background: '#FCFAF6' }}>
+                <div style={{ fontSize: '10px', color: 'rgba(31,46,35,0.35)', marginBottom: '6px', letterSpacing: '.08em' }}>FROM</div>
+                <div style={{ fontSize: '13px', color: '#1F2E23', marginBottom: '12px' }}>Legacy Vault &lt;noreply@legacyvault.app&gt;</div>
+                <div style={{ fontSize: '10px', color: 'rgba(31,46,35,0.35)', marginBottom: '6px', letterSpacing: '.08em' }}>SUBJECT</div>
+                <div style={{ fontSize: '14px', color: '#1F2E23', fontWeight: 500 }}>Someone left you a message in their Legacy Vault</div>
+              </div>
+              {/* Email body mockup */}
+              <div style={{ padding: '28px 24px', textAlign: 'center' }}>
+                <div style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '13px', fontWeight: 600, color: '#B89B5E', letterSpacing: '.15em', textTransform: 'uppercase', marginBottom: '20px' }}>
+                  Legacy Vault
+                </div>
+                <div style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '22px', fontWeight: 300, color: '#1F2E23', lineHeight: 1.4, marginBottom: '12px' }}>
+                  A message has been left for you.
+                </div>
+                <div style={{ fontSize: '13px', color: 'rgba(31,46,35,0.5)', lineHeight: 1.7, marginBottom: '24px', maxWidth: '380px', margin: '0 auto 24px' }}>
+                  Someone who cares about you took the time to record a message, write a letter, or leave important information — and chose you to receive it.
+                </div>
+                {/* Preview card mockup */}
+                <div style={{
+                  background: '#F8F6F1',
+                  border: '1px solid rgba(31,46,35,0.08)',
+                  borderRadius: '8px',
+                  padding: '20px',
+                  maxWidth: '320px',
+                  margin: '0 auto 20px',
+                  textAlign: 'left',
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
+                    <div style={{ fontSize: '18px' }}>{'\uD83C\uDFA5'}</div>
+                    <div>
+                      <div style={{ fontSize: '13px', fontWeight: 500, color: '#1F2E23' }}>Video Message</div>
+                      <div style={{ fontSize: '10px', color: 'rgba(31,46,35,0.4)' }}>Recorded with love</div>
+                    </div>
+                  </div>
+                  <div style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '14px', color: 'rgba(31,46,35,0.55)', fontStyle: 'italic', lineHeight: 1.6 }}>
+                    "I wanted you to hear this from me, in my own words..."
+                  </div>
+                </div>
+                <div style={{
+                  display: 'inline-block',
+                  padding: '12px 32px',
+                  background: '#1F2E23',
+                  color: '#B89B5E',
+                  borderRadius: '4px',
+                  fontSize: '11px',
+                  letterSpacing: '.12em',
+                  textTransform: 'uppercase',
+                  fontWeight: 600,
+                }}>
+                  Open Your Message
+                </div>
+                <div style={{ marginTop: '20px', fontSize: '10px', color: 'rgba(31,46,35,0.25)', letterSpacing: '.06em' }}>
+                  Delivered securely by Legacy Vault
+                </div>
+              </div>
+            </div>
+            <div style={{ marginTop: '10px', fontSize: '11px', color: 'rgba(31,46,35,0.3)', fontStyle: 'italic', fontFamily: 'Cormorant Garamond, serif', textAlign: 'center' }}>
+              This is a preview of the email your recipients will receive when your vault is delivered.
+            </div>
+          </div>
+        </div>
+
         {loading ? (
           <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(31,46,35,0.35)', fontSize: '13px' }}>Loading settings...</div>
         ) : (

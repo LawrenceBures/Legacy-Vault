@@ -40,6 +40,17 @@ export default function EntryDetailPage() {
   const [deleting, setDeleting] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [hoveredBtn, setHoveredBtn] = useState<string | null>(null)
+  const [previewHover, setPreviewHover] = useState(false)
+  const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [hoveredNav, setHoveredNav] = useState<number | null>(null)
+  const [isMobile, setIsMobile] = useState(false)
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768)
+    check()
+    window.addEventListener('resize', check)
+    return () => window.removeEventListener('resize', check)
+  }, [])
 
   useEffect(() => {
     if (isLoaded && !user) router.push('/sign-in')
@@ -132,6 +143,14 @@ export default function EntryDetailPage() {
 
   if (!isLoaded || !user) return null
 
+  const navItems = [
+    { icon: '\u229E', label: 'Dashboard', href: '/dashboard' },
+    { icon: '\uD83D\uDD12', label: 'My Vault', href: '/vault', active: true },
+    { icon: '+', label: 'New Entry', href: '/new-entry' },
+    { icon: '\uD83D\uDC65', label: 'My People', href: '/my-people' },
+    { icon: '\u23F1', label: 'Delivery', href: '/delivery' },
+  ]
+
   const inputStyle = {
     width: '100%',
     padding: '12px 16px',
@@ -147,47 +166,90 @@ export default function EntryDetailPage() {
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: '#F5F3EF' }}>
+      {/* SIDEBAR — desktop */}
       <aside
+        onMouseEnter={() => setSidebarOpen(true)}
+        onMouseLeave={() => setSidebarOpen(false)}
         style={{
-          width: '64px',
-          background: '#1F2E23',
-          display: 'flex',
+          display: isMobile ? 'none' : 'flex',
           flexDirection: 'column',
-          alignItems: 'center',
+          width: sidebarOpen ? '200px' : '64px',
+          background: '#1F2E23',
+          alignItems: sidebarOpen ? 'flex-start' : 'center',
           padding: '20px 0',
           gap: '6px',
           borderRight: '1px solid rgba(184,155,94,0.1)',
           flexShrink: 0,
+          transition: 'width 0.25s ease',
+          overflow: 'hidden',
+          position: 'relative',
+          zIndex: 10,
         }}
       >
-        <div
-          style={{
-            fontFamily: 'Cormorant Garamond, serif',
-            fontSize: '10px',
-            fontWeight: 600,
-            color: '#B89B5E',
-            letterSpacing: '.05em',
-            textAlign: 'center',
-            lineHeight: 1.2,
-            paddingBottom: '16px',
-            borderBottom: '1px solid rgba(184,155,94,0.12)',
-            marginBottom: '8px',
-            width: '100%',
-          }}
-        >
-          LV
+        <div style={{
+          fontFamily: 'Cormorant Garamond, serif',
+          fontSize: sidebarOpen ? '13px' : '10px',
+          fontWeight: 600,
+          color: '#B89B5E',
+          letterSpacing: '.05em',
+          textAlign: sidebarOpen ? 'left' : 'center',
+          lineHeight: 1.2,
+          paddingBottom: '16px',
+          borderBottom: '1px solid rgba(184,155,94,0.12)',
+          marginBottom: '8px',
+          width: '100%',
+          paddingLeft: sidebarOpen ? '20px' : '0',
+          paddingRight: sidebarOpen ? '20px' : '0',
+          transition: 'all 0.25s ease',
+          whiteSpace: 'nowrap',
+        }}>
+          {sidebarOpen ? 'Legacy Vault' : 'LV'}
         </div>
 
-        <a href="/dashboard" style={{ color: 'rgba(245,243,239,0.35)', textDecoration: 'none', fontSize: '16px', width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>&#x229E;</a>
-        <a href="/vault" style={{ color: '#B89B5E', textDecoration: 'none', fontSize: '16px', width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>&#x1F512;</a>
-        <a href="/new-entry" style={{ color: 'rgba(245,243,239,0.35)', textDecoration: 'none', fontSize: '16px', width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>+</a>
+        {navItems.map((item, i) => (
+          <a key={item.href} href={item.href}
+            onMouseEnter={() => setHoveredNav(i)}
+            onMouseLeave={() => setHoveredNav(null)}
+            style={{
+              width: sidebarOpen ? 'calc(100% - 16px)' : '40px',
+              height: '40px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: sidebarOpen ? 'flex-start' : 'center',
+              gap: '10px',
+              borderRadius: '8px',
+              color: item.active ? '#B89B5E' : hoveredNav === i ? '#F5F3EF' : 'rgba(245,243,239,0.35)',
+              background: item.active ? 'rgba(184,155,94,0.15)' : hoveredNav === i ? 'rgba(245,243,239,0.06)' : 'transparent',
+              cursor: 'pointer',
+              fontSize: '16px',
+              textDecoration: 'none',
+              transition: 'all .2s',
+              paddingLeft: sidebarOpen ? '12px' : '0',
+              marginLeft: sidebarOpen ? '8px' : '0',
+              flexShrink: 0,
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+            }}
+          >
+            <span style={{ flexShrink: 0 }}>{item.icon}</span>
+            {sidebarOpen && <span style={{ fontSize: '12px', fontFamily: 'DM Sans, sans-serif', letterSpacing: '.04em' }}>{item.label}</span>}
+          </a>
+        ))}
 
-        <div style={{ marginTop: 'auto', paddingBottom: '8px' }}>
+        <div style={{
+          marginTop: 'auto',
+          paddingBottom: '8px',
+          paddingLeft: sidebarOpen ? '20px' : '0',
+          width: '100%',
+          display: 'flex',
+          justifyContent: sidebarOpen ? 'flex-start' : 'center',
+          transition: 'all 0.25s ease',
+        }}>
           <UserButton />
         </div>
       </aside>
 
-      <main style={{ flex: 1, overflowY: 'auto' }}>
+      <main style={{ flex: 1, overflowY: 'auto', paddingBottom: isMobile ? '70px' : '0' }}>
         <div
           style={{
             padding: '28px 28px 24px',
@@ -316,9 +378,35 @@ export default function EntryDetailPage() {
                     {entry.title}
                   </h1>
 
-                  <div style={{ fontSize: '12px', color: 'rgba(31,46,35,0.45)', marginBottom: '8px' }}>
+                  <div style={{ fontSize: '12px', color: 'rgba(31,46,35,0.45)', marginBottom: '12px' }}>
                     {new Date(entry.created_at).toLocaleDateString()} &bull; {entry.format}
                   </div>
+
+                  <a
+                    href={`/vault/${entryId}/preview`}
+                    onMouseEnter={() => setPreviewHover(true)}
+                    onMouseLeave={() => setPreviewHover(false)}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      padding: '8px 18px',
+                      border: '1px solid rgba(184,155,94,0.4)',
+                      borderRadius: '4px',
+                      background: previewHover ? 'rgba(184,155,94,0.08)' : 'transparent',
+                      color: '#B89B5E',
+                      fontSize: '11px',
+                      letterSpacing: '.08em',
+                      textTransform: 'uppercase' as const,
+                      textDecoration: 'none',
+                      fontWeight: 500,
+                      fontFamily: 'DM Sans, sans-serif',
+                      transition: 'all 0.18s ease',
+                      marginBottom: '16px',
+                    }}
+                  >
+                    <span style={{ fontSize: '14px' }}>&#128065;</span> Preview as Recipient
+                  </a>
 
                   <div style={{
                     fontFamily: 'Cormorant Garamond, serif',
@@ -460,6 +548,32 @@ export default function EntryDetailPage() {
           </div>
         )}
       </main>
+
+      {/* MOBILE BOTTOM NAV */}
+      {isMobile && (
+        <div style={{
+          position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 100,
+          background: '#1F2E23', borderTop: '1px solid rgba(184,155,94,0.15)',
+          display: 'flex', alignItems: 'center', justifyContent: 'space-around',
+          padding: '8px 0', height: '60px',
+        }}>
+          {[
+            { icon: '\u229E', label: 'Dashboard', href: '/dashboard' },
+            { icon: '\uD83D\uDD12', label: 'Vault', href: '/vault' },
+            { icon: '+', label: 'New', href: '/new-entry' },
+            { icon: '\uD83D\uDC65', label: 'People', href: '/my-people' },
+            { icon: '\u23F1', label: 'Delivery', href: '/delivery' },
+          ].map(item => (
+            <a key={item.href} href={item.href} style={{
+              display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px',
+              textDecoration: 'none', flex: 1,
+            }}>
+              <div style={{ fontSize: item.icon === '+' ? '22px' : '16px', color: item.href === '/vault' ? '#B89B5E' : 'rgba(245,243,239,0.5)' }}>{item.icon}</div>
+              <div style={{ fontSize: '9px', color: item.href === '/vault' ? '#B89B5E' : 'rgba(245,243,239,0.4)', letterSpacing: '.04em' }}>{item.label}</div>
+            </a>
+          ))}
+        </div>
+      )}
     </div>
   )
 }

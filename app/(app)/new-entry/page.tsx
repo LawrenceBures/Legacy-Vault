@@ -40,6 +40,7 @@ export default function NewEntryPage() {
   const [step, setStep] = useState<Step>(1)
   const [entryFormat, setEntryFormat] = useState<EntryFormat>(null)
   const [title, setName] = useState('')
+  const [description, setDescription] = useState('')
   const [message, setMessage] = useState('')
   const [uploadedFile, setUploadedFile] = useState<File | null>(null)
   const [recording, setRecording] = useState(false)
@@ -351,8 +352,8 @@ if (!isLoaded || !user) return null
                 <label style={{ fontSize: '10px', letterSpacing: '.15em', textTransform: 'uppercase', color: 'rgba(31,46,35,0.5)', display: 'block', marginBottom: '8px' }}>
                   Description <span style={{ color: 'rgba(31,46,35,0.3)', textTransform: 'none', letterSpacing: 0 }}>(optional)</span>
                 </label>
-                <textarea placeholder="Add a brief note about this entry..." value={message}
-                  onChange={e => setMessage(e.target.value)} rows={3}
+                <textarea placeholder="Add a brief note about this entry..." value={description}
+                  onChange={e => setDescription(e.target.value)} rows={3}
                   style={{ ...inputStyle, resize: 'vertical', minHeight: '80px' }} />
               </div>
             </div>

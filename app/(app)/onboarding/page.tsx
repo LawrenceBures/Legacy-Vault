@@ -132,11 +132,8 @@ export default function OnboardingPage() {
   }
 
   const tiers = [
-    { id: 'starter_founder', name: 'Starter Vault', price: '$1.99/mo', badge: '✓ Available', features: ['1 vault entry', '1 recipient', 'Text messages only', '1GB storage', 'Annual check-in reminder', 'Basic inactivity trigger'] },
-    { id: 'basic_founder', name: 'Basic', price: '$4.99/mo', badge: '✓ Available', features: ['1 vault entry', 'Up to 3 recipients', 'Audio messages', '1 AI Legacy Letter', 'Milestone Delivery (1)', '2GB storage'] },
-    { id: 'legacy_founder', name: 'Legacy', price: '$9.99/mo', badge: '🔥 Most popular', features: ['Unlimited vault entries', 'Unlimited recipients', 'Audio & video', 'Full AI writing assistant', 'Unlimited Milestone Delivery', 'Family unlock code', '25GB storage'] },
-    { id: 'family_founder', name: 'Family', price: '$19.99/mo', badge: '⚠️ Limited', features: ['Up to 5 individual vaults', 'Everything in Legacy', 'Family Admin Dashboard', 'Multiple unlock codes', '100GB shared storage'] },
-    { id: 'estate_founder', name: 'Estate', price: '$49.99/mo', badge: '🚨 4 spots left', features: ['Everything in Family', 'Attorney-verified documents', 'Dedicated account manager', 'White-glove onboarding', 'Unlimited storage'] },
+    { id: 'free', name: 'Free', price: '$0', badge: 'Try it out', features: ['1 text entry', '1 recipient', 'Inactivity trigger', 'Basic storage'] },
+    { id: 'legacy_founder', name: 'Legacy', price: '$9.99', badge: 'Everything unlocked', features: ['Unlimited vault entries', 'Unlimited recipients', 'Video & audio messages', 'AI writing assistant', 'All delivery triggers', 'Family unlock code'] },
   ]
 
   return (
@@ -237,7 +234,7 @@ export default function OnboardingPage() {
             <div style={{ fontSize: '10px', letterSpacing: '.25em', textTransform: 'uppercase', color: 'rgba(184,155,94,0.6)', marginBottom: '10px' }}>Step 1 of 3</div>
             <div style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: isMobile ? '28px' : '34px', fontWeight: 300, color: '#F5F3EF', lineHeight: 1.2, marginBottom: '8px' }}>Choose your vault plan.</div>
             <div style={{ fontSize: '13px', color: 'rgba(245,243,239,0.4)', fontFamily: 'Cormorant Garamond, serif', fontStyle: 'italic' }}>
-              Founders pricing — locked in forever.
+              Start free, or unlock everything for one simple price.
             </div>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: isMobile ? '55vh' : 'none', overflowY: isMobile ? 'auto' : 'visible', paddingRight: isMobile ? '4px' : '0' }}>
@@ -280,7 +277,7 @@ export default function OnboardingPage() {
             ))}
           </div>
           <div style={{ marginTop: '12px', padding: '10px 14px', background: 'rgba(184,155,94,0.06)', border: '1px solid rgba(184,155,94,0.15)', borderRadius: '6px', fontSize: '12px', color: 'rgba(245,243,239,0.4)', fontStyle: 'italic', fontFamily: 'Cormorant Garamond, serif' }}>
-            Founders pricing is locked in forever. Choose the plan that fits your legacy.
+            One-time payment. No subscription. Your legacy, on your terms.
           </div>
         </div>
       )}
