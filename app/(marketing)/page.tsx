@@ -723,7 +723,7 @@ export default function LandingPage() {
             MVP flow.
           </h2>
           <p style={{ fontSize: '16px', color: 'rgba(31,46,35,0.58)', lineHeight: 1.8, margin: '0 auto 2rem', maxWidth: '640px' }}>
-            Pricing is not shown here yet. For now, the public site should send people into the guided setup where they can choose a recipient, create a message, set a delivery trigger, and preview the delivery experience.
+            Create your first vault entry in minutes. Choose a recipient, write what matters most, set a delivery trigger, and preview how they will experience it.
           </p>
 
           <a

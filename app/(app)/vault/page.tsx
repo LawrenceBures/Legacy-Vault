@@ -13,6 +13,7 @@ type Entry = {
   media_url: string | null
   status: string
   created_at: string
+  recipientNames?: string[]
 }
 
 export default function VaultPage() {
@@ -64,7 +65,42 @@ export default function VaultPage() {
         .order('created_at', { ascending: false })
 
       if (error) throw error
-      setEntries(data || [])
+
+      // Fetch recipient assignments for all entries
+      const entryIds = (data || []).map(e => e.id)
+      let recipientMap: Record<string, string[]> = {}
+
+      if (entryIds.length > 0) {
+        const { data: assignments } = await supabase
+          .from('vault_entry_recipients')
+          .select('vault_entry_id, recipient_id')
+          .in('vault_entry_id', entryIds)
+
+        if (assignments && assignments.length > 0) {
+          const recipientIds = [...new Set(assignments.map(a => a.recipient_id))]
+          const { data: recipientData } = await supabase
+            .from('recipients')
+            .select('id, name')
+            .in('id', recipientIds)
+
+          const nameMap: Record<string, string> = {}
+          ;(recipientData || []).forEach(r => { nameMap[r.id] = r.name })
+
+          assignments.forEach(a => {
+            if (!recipientMap[a.vault_entry_id]) recipientMap[a.vault_entry_id] = []
+            if (nameMap[a.recipient_id]) {
+              recipientMap[a.vault_entry_id].push(nameMap[a.recipient_id])
+            }
+          })
+        }
+      }
+
+      const entriesWithRecipients = (data || []).map(e => ({
+        ...e,
+        recipientNames: recipientMap[e.id] || [],
+      }))
+
+      setEntries(entriesWithRecipients)
     } catch (err) {
       console.error('Error fetching entries:', err)
     } finally {
@@ -314,7 +350,11 @@ export default function VaultPage() {
                 )}
 
                 <div style={{ marginTop: '14px', paddingTop: '12px', borderTop: '1px solid rgba(31,46,35,0.06)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <div style={{ fontSize: '10px', color: 'rgba(31,46,35,0.3)' }}>No recipients assigned</div>
+                  <div style={{ fontSize: '10px', color: entry.recipientNames && entry.recipientNames.length > 0 ? '#B89B5E' : 'rgba(31,46,35,0.3)' }}>
+                    {entry.recipientNames && entry.recipientNames.length > 0
+                      ? entry.recipientNames.join(', ')
+                      : 'No recipients assigned'}
+                  </div>
                   <div style={{ fontSize: '11px', color: '#B89B5E' }}>Edit →</div>
                 </div>
               </div>

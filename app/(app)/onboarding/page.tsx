@@ -280,7 +280,7 @@ export default function OnboardingPage() {
             ))}
           </div>
           <div style={{ marginTop: '12px', padding: '10px 14px', background: 'rgba(184,155,94,0.06)', border: '1px solid rgba(184,155,94,0.15)', borderRadius: '6px', fontSize: '12px', color: 'rgba(245,243,239,0.4)', fontStyle: 'italic', fontFamily: 'Cormorant Garamond, serif' }}>
-            No credit card required now. You'll be notified at launch on May 15, 2026.
+            Founders pricing is locked in forever. Choose the plan that fits your legacy.
           </div>
         </div>
       )}

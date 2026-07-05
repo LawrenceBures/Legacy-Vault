@@ -2,7 +2,7 @@
 
 import { useUser, UserButton, SignOutButton } from '@clerk/nextjs'
 import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 
 type Recipient = {
   id: string
@@ -23,10 +23,30 @@ export default function MyPeoplePage() {
   const [hoveredCard, setHoveredCard] = useState<string | null>(null)
   const [form, setForm] = useState({ name: '', email: '', phone: '', relationship: '' })
   const [formError, setFormError] = useState('')
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     if (isLoaded && !user) router.push('/sign-in')
   }, [isLoaded, user, router])
+
+  const fetchRecipients = useCallback(async () => {
+    if (!user) return
+    try {
+      const res = await fetch('/api/recipients')
+      if (res.ok) {
+        const data = await res.json()
+        setRecipients(data)
+      }
+    } catch (err) {
+      console.error('Error fetching recipients:', err)
+    } finally {
+      setLoading(false)
+    }
+  }, [user])
+
+  useEffect(() => {
+    if (isLoaded && user) fetchRecipients()
+  }, [isLoaded, user, fetchRecipients])
 
   if (!isLoaded || !user) return null
 
@@ -40,26 +60,47 @@ export default function MyPeoplePage() {
 
   const relationships = ['Spouse', 'Partner', 'Child', 'Parent', 'Sibling', 'Friend', 'Advisor', 'Other']
 
-  const handleAdd = () => {
+  const handleAdd = async () => {
     if (!form.name.trim() || !form.email.trim()) {
       setFormError('Name and email are required.')
       return
     }
-    const newRecipient: Recipient = {
-      id: Date.now().toString(),
-      name: form.name.trim(),
-      email: form.email.trim(),
-      phone: form.phone.trim(),
-      relationship: form.relationship || 'Other',
+    try {
+      const res = await fetch('/api/recipients', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: form.name.trim(),
+          email: form.email.trim(),
+          phone: form.phone.trim(),
+          relationship: form.relationship || 'Other',
+        }),
+      })
+      if (!res.ok) {
+        const data = await res.json()
+        setFormError(data.error || 'Failed to save recipient.')
+        return
+      }
+      const newRecipient = await res.json()
+      setRecipients([newRecipient, ...recipients])
+      setForm({ name: '', email: '', phone: '', relationship: '' })
+      setFormError('')
+      setShowForm(false)
+    } catch (err) {
+      console.error('Error saving recipient:', err)
+      setFormError('Something went wrong. Please try again.')
     }
-    setRecipients([...recipients, newRecipient])
-    setForm({ name: '', email: '', phone: '', relationship: '' })
-    setFormError('')
-    setShowForm(false)
   }
 
-  const handleRemove = (id: string) => {
-    setRecipients(recipients.filter(r => r.id !== id))
+  const handleRemove = async (id: string) => {
+    try {
+      const res = await fetch(`/api/recipients?id=${id}`, { method: 'DELETE' })
+      if (res.ok) {
+        setRecipients(recipients.filter(r => r.id !== id))
+      }
+    } catch (err) {
+      console.error('Error removing recipient:', err)
+    }
   }
 
   const inputStyle = {

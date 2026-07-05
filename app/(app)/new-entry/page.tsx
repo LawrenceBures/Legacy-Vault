@@ -122,10 +122,15 @@ if (!isLoaded || !user) return null
     { icon: '⏱', label: 'Delivery', href: '/delivery' },
   ]
 
+  const plan = userPlan as import('@/lib/featureGating').Tier
+  const videoLocked = !canUseVideo(plan)
+  const audioLocked = !canUseAudio(plan)
+  const aiLocked = !canUseAI(plan)
+
   const entryFormats = [
-    { id: 'video', icon: '🎥', label: 'Video Message', desc: 'Let them see you. Speak directly to the people who matter most.' },
-    { id: 'audio', icon: '🎙️', label: 'Voice Recording', desc: 'Sometimes your voice says more than anything written ever could.' },
-    { id: 'text', icon: '✍️', label: 'Written Letter', desc: 'Write something they can return to, again and again.' },
+    { id: 'video', icon: '🎥', label: 'Video Message', desc: 'Let them see you. Speak directly to the people who matter most.', locked: videoLocked, upgradeMsg: getUpgradeMessage('video') },
+    { id: 'audio', icon: '🎙️', label: 'Voice Recording', desc: 'Sometimes your voice says more than anything written ever could.', locked: audioLocked, upgradeMsg: getUpgradeMessage('audio') },
+    { id: 'text', icon: '✍️', label: 'Written Letter', desc: 'Write something they can return to, again and again.', locked: false, upgradeMsg: '' },
   ]
 
   const steps = [
@@ -291,29 +296,40 @@ if (!isLoaded || !user) return null
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 {entryFormats.map((type) => (
-                  <div key={type.id} onClick={() => setEntryFormat(type.id as EntryFormat)}
+                  <div key={type.id} onClick={() => { if (!type.locked) setEntryFormat(type.id as EntryFormat) }}
                     onMouseEnter={() => setHoveredFormat(type.id)} onMouseLeave={() => setHoveredFormat(null)}
                     style={{
                       padding: isMobile ? '16px' : '20px 24px',
-                      border: `1px solid ${entryFormat === type.id ? '#B89B5E' : hoveredFormat === type.id ? 'rgba(184,155,94,0.4)' : 'rgba(31,46,35,0.12)'}`,
-                      borderRadius: '6px', background: entryFormat === type.id ? 'rgba(184,155,94,0.06)' : '#fff',
-                      cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '16px', transition: 'all 0.2s ease',
+                      border: `1px solid ${type.locked ? 'rgba(31,46,35,0.08)' : entryFormat === type.id ? '#B89B5E' : hoveredFormat === type.id ? 'rgba(184,155,94,0.4)' : 'rgba(31,46,35,0.12)'}`,
+                      borderRadius: '6px',
+                      background: type.locked ? 'rgba(31,46,35,0.03)' : entryFormat === type.id ? 'rgba(184,155,94,0.06)' : '#fff',
+                      cursor: type.locked ? 'not-allowed' : 'pointer',
+                      display: 'flex', alignItems: 'center', gap: '16px', transition: 'all 0.2s ease',
+                      opacity: type.locked ? 0.55 : 1,
                     }}
                   >
-                    <div style={{ fontSize: '24px', flexShrink: 0 }}>{type.icon}</div>
+                    <div style={{ fontSize: '24px', flexShrink: 0 }}>{type.locked ? '🔒' : type.icon}</div>
                     <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: '14px', fontWeight: 500, color: '#1F2E23', marginBottom: '2px' }}>{type.label}</div>
-                      {!isMobile && <div style={{ fontSize: '12px', color: 'rgba(31,46,35,0.45)' }}>{type.desc}</div>}
+                      <div style={{ fontSize: '14px', fontWeight: 500, color: '#1F2E23', marginBottom: '2px' }}>
+                        {type.label}
+                      </div>
+                      {!isMobile && (
+                        <div style={{ fontSize: '12px', color: type.locked ? '#e67e22' : 'rgba(31,46,35,0.45)' }}>
+                          {type.locked ? type.upgradeMsg : type.desc}
+                        </div>
+                      )}
                     </div>
-                    <div style={{
-                      width: '20px', height: '20px', borderRadius: '50%',
-                      border: `2px solid ${entryFormat === type.id ? '#B89B5E' : 'rgba(31,46,35,0.2)'}`,
-                      background: entryFormat === type.id ? '#B89B5E' : 'transparent',
-                      flexShrink: 0, transition: 'all 0.18s ease',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    }}>
-                      {entryFormat === type.id && <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#fff' }} />}
-                    </div>
+                    {!type.locked && (
+                      <div style={{
+                        width: '20px', height: '20px', borderRadius: '50%',
+                        border: `2px solid ${entryFormat === type.id ? '#B89B5E' : 'rgba(31,46,35,0.2)'}`,
+                        background: entryFormat === type.id ? '#B89B5E' : 'transparent',
+                        flexShrink: 0, transition: 'all 0.18s ease',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      }}>
+                        {entryFormat === type.id && <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#fff' }} />}
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
@@ -365,11 +381,17 @@ if (!isLoaded || !user) return null
                     maxLength={2000}
                   />
                   <div style={{ marginTop: '18px', borderTop: '1px solid rgba(184,155,94,0.10)', paddingTop: '18px' }}>
-                    <AIWritingAssistant
-                      onUseMessage={(text) => setMessage(text)}
-                      recipientName={undefined}
-                      entryTitle={title}
-                    />
+                    {aiLocked ? (
+                      <div style={{ fontSize: '12px', color: '#e67e22', fontStyle: 'italic', padding: '12px 0' }}>
+                        {getUpgradeMessage('ai')}
+                      </div>
+                    ) : (
+                      <AIWritingAssistant
+                        onUseMessage={(text) => setMessage(text)}
+                        recipientName={undefined}
+                        entryTitle={title}
+                      />
+                    )}
                   </div>
                 </div>
               )}
