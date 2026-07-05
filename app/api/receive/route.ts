@@ -15,18 +15,23 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'Missing entry ID' }, { status: 400 })
     }
 
-    // TODO: When delivery tokens are implemented, validate token against
-    // a delivery_tokens table. For now, we allow access by entry ID
-    // as a temporary measure during development.
-
     const { data: entry, error: entryError } = await supabase
       .from('vault_entries')
-      .select('id, title, format, message_content, media_url, created_at, user_id')
+      .select('id, title, format, message_content, media_url, created_at, user_id, status')
       .eq('id', entryId)
       .single()
 
     if (entryError || !entry) {
       return NextResponse.json({ error: 'Entry not found' }, { status: 404 })
+    }
+
+    // Only allow viewing entries that have been officially delivered.
+    // Active (not yet delivered) entries must not be accessible.
+    if (entry.status !== 'delivered') {
+      return NextResponse.json(
+        { error: 'This entry has not been delivered yet.' },
+        { status: 403 }
+      )
     }
 
     // Get sender name from profile
@@ -41,8 +46,8 @@ export async function GET(req: NextRequest) {
       senderName = profile.full_name
     }
 
-    // Don't expose user_id to the public
-    const { user_id, ...safeEntry } = entry
+    // Don't expose internal fields to the public
+    const { user_id, status, ...safeEntry } = entry
 
     return NextResponse.json({
       entry: safeEntry,

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { auth } from '@clerk/nextjs/server'
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY!
 
@@ -21,6 +22,13 @@ async function sendEmail(to: string, subject: string, html: string) {
 
 export async function POST(req: NextRequest) {
   try {
+    const authHeader = req.headers.get('authorization')
+    const cronSecret = process.env.CRON_SECRET
+    const { userId } = await auth()
+    if (!userId && authHeader !== `Bearer ${cronSecret}`) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
     const { type, to, name, tier } = await req.json()
 
     if (type === 'waitlist_confirmation') {

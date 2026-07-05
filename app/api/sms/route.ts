@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { auth } from '@clerk/nextjs/server'
 
 const TWILIO_ACCOUNT_SID = process.env.TWILIO_ACCOUNT_SID!
 const TWILIO_AUTH_TOKEN = process.env.TWILIO_AUTH_TOKEN!
@@ -26,6 +27,13 @@ async function sendSMS(to: string, body: string) {
 
 export async function POST(req: NextRequest) {
   try {
+    const authHeader = req.headers.get('authorization')
+    const cronSecret = process.env.CRON_SECRET
+    const { userId } = await auth()
+    if (!userId && authHeader !== `Bearer ${cronSecret}`) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
     const { type, to, name, tier } = await req.json()
     if (!to) return NextResponse.json({ error: 'Missing phone number' }, { status: 400 })
 

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { createClient } from "@/lib/supabase/server";
+import { canUseVideo, canUseAudio, type Tier } from "@/lib/featureGating";
 
 export async function POST(req: NextRequest) {
   try {
@@ -13,7 +14,8 @@ export async function POST(req: NextRequest) {
 
     const title = String(formData.get("title") || "").trim();
     const message = String(formData.get("message") || "").trim();
-    const entryType = String(formData.get("entryType") || "text").trim();
+    const entryType = String(formData.get("entryFormat") || formData.get("entryType") || "text").trim();
+    const description = formData.get("description") as string | null;
     const email = String(formData.get("email") || "").trim() || null;
     const fullName = String(formData.get("full_name") || "").trim() || null;
     const file = formData.get("file");
@@ -31,7 +33,7 @@ export async function POST(req: NextRequest) {
     // Ensure profile exists
     let { data: profile } = await supabase
       .from("profiles")
-      .select("id")
+      .select("id, plan")
       .eq("clerk_id", userId)
       .single();
 
@@ -42,13 +44,28 @@ export async function POST(req: NextRequest) {
           clerk_id: userId,
           email,
           full_name: fullName,
-          plan: "pro",
+          plan: "free",
         })
-        .select("id")
+        .select("id, plan")
         .single();
 
       if (error) throw error;
       profile = newProfile;
+    }
+
+    // Server-side feature gating
+    const userPlan = (profile.plan || "free") as Tier;
+    if (entryType === "video" && !canUseVideo(userPlan)) {
+      return NextResponse.json(
+        { error: "Video messages require a Legacy plan or above." },
+        { status: 403 }
+      );
+    }
+    if (entryType === "audio" && !canUseAudio(userPlan)) {
+      return NextResponse.json(
+        { error: "Audio messages require a Basic plan or above." },
+        { status: 403 }
+      );
     }
 
     let mediaUrl: string | null = null;
@@ -84,6 +101,7 @@ export async function POST(req: NextRequest) {
       user_id: profile.id,
       title,
       message_content: message || null,
+      description: description || null,
       format: entryType,
       media_url: mediaUrl,
       status: "active",

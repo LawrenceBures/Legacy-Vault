@@ -30,10 +30,20 @@ export async function GET(req: NextRequest) {
 
     if (!profile) return NextResponse.json({ error: 'Profile not found' }, { status: 404 })
 
+    // Get user's vault entry IDs for filtering delivery_events
+    const { data: userEntries } = await supabase
+      .from('vault_entries')
+      .select('id')
+      .eq('user_id', profile.id)
+
+    const userEntryIds = (userEntries || []).map((e: { id: string }) => e.id)
+
     const [entriesRes, recipientsRes, deliveredRes, deliveryRes] = await Promise.all([
       supabase.from('vault_entries').select('id', { count: 'exact', head: true }).eq('user_id', profile.id),
       supabase.from('recipients').select('id', { count: 'exact', head: true }).eq('user_id', profile.id),
-      supabase.from('delivery_events').select('id', { count: 'exact', head: true }).eq('status', 'delivered'),
+      userEntryIds.length > 0
+        ? supabase.from('delivery_events').select('id', { count: 'exact', head: true }).eq('status', 'delivered').in('vault_entry_id', userEntryIds)
+        : Promise.resolve({ count: 0 } as any),
       supabase.from('delivery_settings').select('inactivity_enabled, unlock_enabled').eq('user_id', profile.id).maybeSingle(),
     ])
 
